@@ -1,0 +1,23 @@
+.sql-debug-body { margin: 0; background: #f4f6f8; color: #17252c; font: 14px/1.6 system-ui, sans-serif; }
+.sql-debug-page { max-width: 1500px; margin: 24px auto; padding: 0 20px; }
+.sql-debug-page h1 { font-size: 24px; }
+.sql-debug-widget { position: fixed; inset: auto 0 0; z-index: 2147483000; color: #e2e8f0; background: #152331; font: 12px/1.5 system-ui, sans-serif; text-align: left; direction: ltr; box-shadow: 0 -2px 12px #14243520; }
+.sql-debug-widget>summary { min-height: 30px; padding: 6px 16px; cursor: pointer; user-select: none; }
+.sql-debug-widget>summary>span { margin-inline-start: 14px; }
+.sql-debug-panel { max-height: 65vh; padding: 8px 16px 16px; overflow: auto; background: #fff; color: #17252c; }
+.sql-debug-panel a,.sql-debug-page a { color: #0759a1; text-decoration: underline; }
+.sql-debug-request { margin: 10px 0; border: 1px solid #d6e0e6; border-radius: 6px; background: #fff; color: #17252c; font: 12px/1.6 system-ui, sans-serif; }
+.sql-debug-request>summary { padding: 10px 12px; cursor: pointer; background: #eef3f7; overflow-wrap: anywhere; }
+.sql-debug-request>summary small { display: block; color: #5c6b75; }
+.sql-debug-table-wrap { width: 100%; overflow: auto; }
+.sql-debug-table { width: 100%; border-collapse: collapse; text-align: left; font: 12px/1.6 system-ui, sans-serif; }
+.sql-debug-table th,.sql-debug-table td { padding: 8px 10px; border-bottom: 1px solid #e3e9ed; vertical-align: top; }
+.sql-debug-table th { white-space: nowrap; background: #f5f7f9; }
+.sql-debug-table td:nth-child(-n+3) { width: 70px; white-space: nowrap; }
+.sql-debug-table pre { min-width: 240px; max-height: 260px; margin: 0 0 5px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; color: #153d55; background: transparent; font: 12px/1.6 ui-monospace, Consolas, monospace; user-select: text; }
+.sql-debug-table small { color: #667983; font-size: 11px; }
+.sql-debug-slow { color: #c41c35; font-weight: 650; }
+.sql-debug-widget>summary .sql-debug-slow { color: #ffadb8; }
+.sql-debug-request>p { padding: 0 12px; }
+.sql-debug-widget summary:focus-visible,.sql-debug-request summary:focus-visible { outline: 2px solid #438bc5; outline-offset: -2px; }
+@media (max-width: 640px) { .sql-debug-widget>summary { font-size: 11px; padding: 7px 8px; } .sql-debug-widget>summary>span { margin-inline-start: 6px; } .sql-debug-panel { padding: 6px; } }

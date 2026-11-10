@@ -1,0 +1,49 @@
+{
+    "name": "coding1688/pl-debug",
+    "description": "Opt-in SQL query profiler with a request toolbar and a history page for Laravel applications.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": ["laravel", "debug", "sql", "profiler", "performance"],
+    "authors": [
+        { "name": "coding1688" }
+    ],
+    "homepage": "https://github.com/coding1688/pl-debug",
+    "support": {
+        "issues": "https://github.com/coding1688/pl-debug/issues",
+        "source": "https://github.com/coding1688/pl-debug"
+    },
+    "require": {
+        "php": "^8.2",
+        "illuminate/contracts": "^11.0|^12.0|^13.0",
+        "illuminate/database": "^11.0|^12.0|^13.0",
+        "illuminate/filesystem": "^11.0|^12.0|^13.0",
+        "illuminate/http": "^11.0|^12.0|^13.0",
+        "illuminate/routing": "^11.0|^12.0|^13.0",
+        "illuminate/support": "^11.0|^12.0|^13.0",
+        "illuminate/view": "^11.0|^12.0|^13.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^9.0|^10.0|^11.0",
+        "phpunit/phpunit": "^10.5|^11.0|^12.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Coding1688\\Debug\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Coding1688\\Debug\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Coding1688\\Debug\\DebugServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "sort-packages": true
+    }
+}
