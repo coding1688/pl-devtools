@@ -74,6 +74,9 @@ return [
     /* Panels shown inside the inline toolbar; the history page shows all. */
     'toolbar_collectors' => ['request', 'sql', 'telemetry'],
 
+    /* Show the toolbar inside iframes (Layui/layer tabs); polling only runs in the top window. */
+    'toolbar_in_iframes' => true,
+
     /* Seconds between toolbar auto-refresh polls; 0 disables polling. */
     'toolbar_refresh' => 2,
 
