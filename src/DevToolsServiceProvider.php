@@ -16,7 +16,7 @@ class DevToolsServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->mergeConfigFrom(__DIR__.'/../config/devtools.php', 'pl.debug');
+        $this->mergeConfigFrom(__DIR__.'/../config/devtools.php', 'pl.devtools');
 
         $this->app->scoped(SqlQueryProfiler::class);
 
