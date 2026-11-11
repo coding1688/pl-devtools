@@ -7,6 +7,7 @@ Laravel developer diagnostics: request profiler, SQL timeline, server informatio
 - PHP 8.2+, Laravel 11 / 12 / 13
 - Disabled by default; requires `APP_DEBUG=true` and an explicit opt-in
 - Frontend-agnostic: Blade, Layui, Vue SPA
+- UI available in English, Simplified Chinese, Traditional Chinese, Japanese and Korean
 - The same security checks run in CI: `php artisan devtools:audit`
 
 ## Features
@@ -239,6 +240,7 @@ All keys live under `pl.devtools`.
 | `log` | `false` | Write the query log |
 | `log_channel` | `single` | Log channel |
 | `css` | `null` | Custom CSS path |
+| `locale` | `null` | UI locale: `en`, `zh_CN`, `zh_TW`, `ja`, `ko`; `null` follows the app locale |
 
 ### Collection
 

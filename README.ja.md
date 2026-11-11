@@ -7,6 +7,7 @@ Laravel 開発者向けの診断ツール：リクエストプロファイル、
 - PHP 8.2+、Laravel 11 / 12 / 13
 - 既定では無効。`APP_DEBUG=true` と明示的な有効化が必要
 - フロントエンド非依存：Blade、Layui、Vue SPA
+- UI は英語、簡体字中国語、繁体字中国語、日本語、韓国語に対応
 - 同じセキュリティチェックを CI で実行：`php artisan devtools:audit`
 
 ## 機能
@@ -133,6 +134,7 @@ php artisan devtools:audit --json --fresh
 | `environments` / `hosts` | `['local','testing']` / `[]` | 許可する環境とホスト |
 | `path` / `route_name` | `__debug/sql` / `debug.sql` | パスとルート名 |
 | `middleware` | `[]` | デバッグルートの追加ミドルウェア |
+| `locale` | `null` | UI 言語：`en`、`zh_CN`、`zh_TW`、`ja`、`ko`。`null` はアプリの locale |
 | `slow_ms` / `max_queries` | `100` / `500` | スロークエリ閾値 / 上限 |
 | `history_limit` / `ttl_seconds` | `50` / `1800` | 履歴件数 / 保持時間 |
 | `toolbar_refresh` / `toolbar_history` | `2` / `20` | ポーリング秒数 / 選択肢数 |

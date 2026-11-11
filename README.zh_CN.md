@@ -6,7 +6,8 @@ Laravel 本地开发诊断工具：请求画像、SQL 时间线、服务器信�
 
 - PHP 8.2+，Laravel 11 / 12 / 13
 - 默认关闭，只在 `APP_DEBUG=true` 且显式开启时工作
-- 与前端框架无关：Blade、Layui、Vue SPA 都能用
+- 与前端框架无关：Blade、Layui、Vue SPA
+- 界面支持英语、简体中文、繁体中文、日语、韩语 都能用
 - 同一套安全检查可以跑 CI：`php artisan devtools:audit`
 
 ## 目录
@@ -251,6 +252,7 @@ jobs:
 | `log` | `false` | 是否写入查询日志 |
 | `log_channel` | `single` | 日志通道 |
 | `css` | `null` | 自定义 CSS 文件路径 |
+| `locale` | `null` | 界面语言：`en`、`zh_CN`、`zh_TW`、`ja`、`ko`；`null` 跟随应用 locale |
 
 ### 采集
 

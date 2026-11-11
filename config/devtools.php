@@ -132,4 +132,7 @@ return [
 
     /* Filled by the service provider with the published or package CSS path. */
     'css' => null,
+
+    /* UI locale (en, zh_CN, zh_TW, ja, ko). Null follows the app locale. */
+    'locale' => null,
 ];

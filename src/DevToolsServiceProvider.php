@@ -55,6 +55,7 @@ class DevToolsServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'pl-devtools');
+        $this->loadTranslationsFrom(__DIR__.'/../lang', 'devtools');
 
         if ($this->app->runningInConsole()) {
             $this->commands([\Coding1688\DevTools\Console\AuditCommand::class]);

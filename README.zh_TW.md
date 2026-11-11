@@ -7,6 +7,7 @@ Laravel 本機開發診斷工具：請求畫像、SQL 時間軸、伺服器資�
 - PHP 8.2+，Laravel 11 / 12 / 13
 - 預設關閉，需 `APP_DEBUG=true` 且明確開啟
 - 與前端框架無關：Blade、Layui、Vue SPA
+- 介面支援英文、簡體中文、繁體中文、日文、韓文
 - 同一套安全檢查可跑 CI：`php artisan devtools:audit`
 
 ## 功能
@@ -133,6 +134,7 @@ php artisan devtools:audit --json --fresh
 | `environments` / `hosts` | `['local','testing']` / `[]` | 允許的環境與網域 |
 | `path` / `route_name` | `__debug/sql` / `debug.sql` | 路徑與路由名 |
 | `middleware` | `[]` | 偵錯路由的額外中介層 |
+| `locale` | `null` | 介面語言：`en`、`zh_CN`、`zh_TW`、`ja`、`ko`；`null` 跟隨應用 locale |
 | `slow_ms` / `max_queries` | `100` / `500` | 慢查詢門檻、單請求上限 |
 | `history_limit` / `ttl_seconds` | `50` / `1800` | 歷史筆數與保留時間 |
 | `toolbar_refresh` / `toolbar_history` | `2` / `20` | 輪詢秒數、下拉選單筆數 |
