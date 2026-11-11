@@ -22,7 +22,17 @@ return [
 
     /* Show which controller handled the request. */
     /* Collectors rendered as tabs on the history page. */
-    'collectors' => [\Coding1688\DevTools\Collectors\RequestCollector::class, \Coding1688\DevTools\Collectors\SqlCollector::class],
+    'collectors' => [
+        \Coding1688\DevTools\Collectors\RequestCollector::class,
+        \Coding1688\DevTools\Collectors\SqlCollector::class,
+        \Coding1688\DevTools\Collectors\ServerCollector::class,
+    ],
+
+    /* Panels shown inside the inline toolbar; the history page shows all. */
+    'toolbar_collectors' => ['request', 'sql'],
+
+    /* Seconds to cache the server diagnostics snapshot. */
+    'diagnostics_ttl' => 300,
 
     /* Record request headers/lists for the Request panel (values stay masked). */
     'collect_request' => true,

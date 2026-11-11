@@ -50,6 +50,7 @@ APP_DEBUG=true
 | --- | --- |
 | `Request` | 方法/路径/状态/路由/控制器/用户、请求头白名单、中间件、查询与提交字段名、IP |
 | `SQL` | 条数/耗时/慢查询、阶段耗时、N+1 调用位置热点、时间线、重复查询分组、查询明细 |
+| `Server` | PHP/SAPI/OS/负载、Laravel 版本与环境、DB 连接与版本、cache/queue/session/fs 驱动、磁盘可用与可写、PHP 扩展、OPcache 命中率 |
 
 Request 面板只记录**字段名与白名单请求头**，不记录参数值、Cookie 或会话内容。
 
@@ -121,6 +122,8 @@ return [
 | `stage_labels` | `[]` | `measure()` 阶段名的显示标签 |
 | `collectors` | Request / SQL | 历史页面板顺序 |
 | `collect_request` | `true` | 是否记录 Request 面板数据 |
+| `toolbar_collectors` | `['request','sql']` | 内联工具栏展示的面板（历史页始终展示全部） |
+| `diagnostics_ttl` | `300` | Server 诊断快照缓存秒数 |
 | `exclude_paths` | `[]` | 归因时忽略的应用文件 |
 
 ## 视图与样式

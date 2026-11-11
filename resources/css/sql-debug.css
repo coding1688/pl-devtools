@@ -41,3 +41,7 @@
 .devtools-tab { padding: 6px 12px; border: 0; border-bottom: 2px solid transparent; background: none; color: #334155; font: inherit; cursor: pointer; }
 .devtools-tab.is-active { border-bottom-color: #1d4ed8; color: #1d4ed8; font-weight: 600; }
 .devtools-panel { padding: 8px 0 4px; }
+
+.sql-debug-extensions { display: flex; flex-wrap: wrap; gap: 4px; margin: 4px 0 12px; }
+.sql-debug-extension { padding: 1px 6px; border-radius: 3px; background: #eef2f6; color: #8a99a8; font-size: 11px; text-decoration: line-through; }
+.sql-debug-extension.is-loaded { background: #e3f4ea; color: #166534; text-decoration: none; }

@@ -3,16 +3,24 @@
 namespace Coding1688\DevTools;
 
 use Coding1688\DevTools\Collectors\CollectorRegistry;
+use Coding1688\DevTools\Diagnostics\ServerInfo;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class DevToolsController extends \Illuminate\Routing\Controller
 {
-    public function __construct(private readonly SqlQueryProfiler $profiler, private readonly CollectorRegistry $collectors) {}
+    public function __construct(
+        private readonly SqlQueryProfiler $profiler,
+        private readonly CollectorRegistry $collectors,
+        private readonly ServerInfo $server,
+    ) {}
 
     public function index(Request $request): Response
     {
         abort_unless($this->profiler->enabledFor($request), 404);
+        if ($request->boolean('fresh')) {
+            $this->server->flush();
+        }
         $id = $request->query('request');
         abort_unless($id === null || (is_string($id) && preg_match('/^[a-f0-9-]{36}$/D', $id) === 1), 404);
         $profiles = $this->profiler->recent($id);

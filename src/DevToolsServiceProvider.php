@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Route;
 use Coding1688\DevTools\Collectors\Collector;
 use Coding1688\DevTools\Collectors\CollectorRegistry;
 use Coding1688\DevTools\Collectors\RequestCollector;
+use Coding1688\DevTools\Collectors\ServerCollector;
+use Coding1688\DevTools\Diagnostics\ServerInfo;
 use Coding1688\DevTools\Collectors\SqlCollector;
 use Illuminate\Support\ServiceProvider;
 
@@ -19,10 +21,11 @@ class DevToolsServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__.'/../config/devtools.php', 'pl.devtools');
 
         $this->app->scoped(SqlQueryProfiler::class);
+        $this->app->singleton(ServerInfo::class);
 
         $this->app->singleton(CollectorRegistry::class, fn (): CollectorRegistry => new CollectorRegistry(array_map(
             fn (string $class): Collector => $this->app->make($class),
-            (array) config('pl.devtools.collectors', [RequestCollector::class, SqlCollector::class]),
+            (array) config('pl.devtools.collectors', [RequestCollector::class, SqlCollector::class, ServerCollector::class]),
         )));
 
         config(['pl.devtools.css' => $this->cssPath()]);

@@ -1,4 +1,5 @@
 @php($collectors = $collectors ?? [])
+@php($visibleCollectors = $standalone ? $collectors : array_values(array_filter($collectors, fn ($item) => in_array($item->key(), (array) config('pl.devtools.toolbar_collectors', ['request', 'sql']), true))))
 @if($standalone)
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>开发工具</title>
@@ -13,7 +14,7 @@
         <a href="?type=html">页面 {{ $counts['html'] ?? 0 }}</a> ·
         <a href="?type=ajax">AJAX {{ $counts['ajax'] ?? 0 }}</a>
     </p>
-    <p>绑定参数不展开。慢查询阈值 {{ config('pl.devtools.slow_ms') }} ms。<a href="{{ route((string) config('pl.devtools.route_name', 'devtools.index')) }}">刷新全部请求</a></p>
+    <p>绑定参数不展开。慢查询阈值 {{ config('pl.devtools.slow_ms') }} ms。<a href="{{ route((string) config('pl.devtools.route_name', 'devtools.index')) }}?fresh=1">刷新全部请求</a></p>
     <p class="sql-debug-controls">自动刷新：
         @foreach([0 => '关闭', 2 => '2 秒', 5 => '5 秒'] as $seconds => $label)
             <a href="{{ request()->fullUrlWithQuery(['refresh' => $seconds]) }}">{{ $label }}</a>@if(! $loop->last) · @endif
@@ -36,11 +37,11 @@
         @else
             <div class="devtools" data-devtools-tabs>
                 <nav class="devtools-tabs">
-                    @foreach($collectors as $collector)
+                    @foreach($visibleCollectors as $collector)
                         <button type="button" class="devtools-tab @if($loop->first) is-active @endif" data-devtools-tab="{{ $collector->key() }}">{{ $collector->label() }}</button>
                     @endforeach
                 </nav>
-                @foreach($collectors as $collector)
+                @foreach($visibleCollectors as $collector)
                     <section class="devtools-panel" data-devtools-panel="{{ $collector->key() }}" @if(! $loop->first) hidden @endif>
                         @include($collector->view(), ['data' => $collector->collect($profile), 'profile' => $profile])
                     </section>
