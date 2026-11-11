@@ -4,8 +4,14 @@
     $locale = config('pl.devtools.locale') ?: app()->getLocale();
     $t = function (string $key, array $replace = [], ?string $fallback = null) use ($locale): string {
         $full = 'devtools::ui.'.$key;
+        if (\Illuminate\Support\Facades\Lang::has($full, $locale)) {
+            return trans($full, $replace, $locale);
+        }
+        if (\Illuminate\Support\Facades\Lang::has($full, 'en')) {
+            return trans($full, $replace, 'en');
+        }
 
-        return \Illuminate\Support\Facades\Lang::has($full, $locale) ? trans($full, $replace, $locale) : ($fallback ?? $key);
+        return $fallback ?? $key;
     };
 @endphp
 @if($standalone)
