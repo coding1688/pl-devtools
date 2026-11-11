@@ -26,7 +26,28 @@ return [
         \Coding1688\DevTools\Collectors\RequestCollector::class,
         \Coding1688\DevTools\Collectors\SqlCollector::class,
         \Coding1688\DevTools\Collectors\ServerCollector::class,
+        \Coding1688\DevTools\Collectors\SecurityCollector::class,
     ],
+
+    /* Security diagnostics: read-only checks, reused by devtools:audit. */
+    'security' => [
+        'checks' => [
+            \Coding1688\DevTools\Diagnostics\Security\Checks\AppDebugCheck::class,
+            \Coding1688\DevTools\Diagnostics\Security\Checks\AppKeyCheck::class,
+            \Coding1688\DevTools\Diagnostics\Security\Checks\SessionCookieCheck::class,
+            \Coding1688\DevTools\Diagnostics\Security\Checks\HttpsUrlCheck::class,
+            \Coding1688\DevTools\Diagnostics\Security\Checks\DebugToolsExposureCheck::class,
+            \Coding1688\DevTools\Diagnostics\Security\Checks\StorageWritableCheck::class,
+            \Coding1688\DevTools\Diagnostics\Security\Checks\PublicExposureCheck::class,
+            \Coding1688\DevTools\Diagnostics\Security\Checks\DatabaseUserCheck::class,
+            \Coding1688\DevTools\Diagnostics\Security\Checks\UploadExtensionCheck::class,
+            \Coding1688\DevTools\Diagnostics\Security\Checks\ProductionDriversCheck::class,
+            \Coding1688\DevTools\Diagnostics\Security\Checks\BcryptRoundsCheck::class,
+            \Coding1688\DevTools\Diagnostics\Security\Checks\ComposerAuditCheck::class,
+        ],
+        'composer_audit' => false,
+    ],
+    'security_ttl' => 300,
 
     /* Panels shown inside the inline toolbar; the history page shows all. */
     'toolbar_collectors' => ['request', 'sql'],

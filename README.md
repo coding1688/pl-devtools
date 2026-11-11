@@ -51,6 +51,7 @@ APP_DEBUG=true
 | `Request` | 方法/路径/状态/路由/控制器/用户、请求头白名单、中间件、查询与提交字段名、IP |
 | `SQL` | 条数/耗时/慢查询、阶段耗时、N+1 调用位置热点、时间线、重复查询分组、查询明细 |
 | `Server` | PHP/SAPI/OS/负载、Laravel 版本与环境、DB 连接与版本、cache/queue/session/fs 驱动、磁盘可用与可写、PHP 扩展、OPcache 命中率 |
+| `Security` | 只读安全检查：环境/密钥/会话 Cookie/HTTPS、调试工具暴露、存储与公开目录、DB 账号、上传白名单、生产驱动、哈希强度、（可选）依赖漏洞 |
 
 Request 面板只记录**字段名与白名单请求头**，不记录参数值、Cookie 或会话内容。
 
@@ -78,6 +79,23 @@ app(SqlQueryProfiler::class)->measure('catalog_cards', fn () => $this->decorate(
 ```
 
 阶段会出现在画像的 `stages` 里，递归同名调用只计一次。
+
+## 安全审计
+
+同一套检查既在 `Security` 面板展示，也能在命令行运行，适合 CI/预发门禁：
+
+```bash
+php artisan devtools:audit                    # 表格输出，高危返回非 0
+php artisan devtools:audit --fail-on=medium  # 中危及以上返回非 0
+php artisan devtools:audit --fail-on=none    # 只报告，不失败
+php artisan devtools:audit --json --fresh    # JSON 输出，忽略缓存
+```
+
+- 全部检查只读，不修改任何配置；不读取数据库密码。
+- 结果按 `diagnostics_ttl`/`security_ttl` 缓存，`--fresh` 或页面 `?fresh=1` 强制重算。
+- 依赖漏洞检查默认关闭（会执行 `composer audit`），开启：`pl.devtools.security.composer_audit = true`。
+
+内置检查：`app.debug`、`app.key`、`session.cookie`、`app.url.https`、`devtools.exposure`、`storage.writable`、`public.exposure`、`database.user`、`upload.extensions`、`production.drivers`、`hashing.rounds`、`composer.audit`。可通过 `pl.devtools.security.checks` 增删。
 
 ## 配置（放在宿主的 `config/pl.php`）
 
@@ -124,6 +142,9 @@ return [
 | `collect_request` | `true` | 是否记录 Request 面板数据 |
 | `toolbar_collectors` | `['request','sql']` | 内联工具栏展示的面板（历史页始终展示全部） |
 | `diagnostics_ttl` | `300` | Server 诊断快照缓存秒数 |
+| `security.checks` | 12 项 | 启用的安全检查类 |
+| `security.composer_audit` | `false` | 是否运行 `composer audit` |
+| `security_ttl` | `300` | 安全检查结果缓存秒数 |
 | `exclude_paths` | `[]` | 归因时忽略的应用文件 |
 
 ## 视图与样式

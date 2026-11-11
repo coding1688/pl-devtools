@@ -9,7 +9,9 @@ use Illuminate\Support\Facades\Route;
 use Coding1688\DevTools\Collectors\Collector;
 use Coding1688\DevTools\Collectors\CollectorRegistry;
 use Coding1688\DevTools\Collectors\RequestCollector;
+use Coding1688\DevTools\Collectors\SecurityCollector;
 use Coding1688\DevTools\Collectors\ServerCollector;
+use Coding1688\DevTools\Diagnostics\Security\SecurityAuditor;
 use Coding1688\DevTools\Diagnostics\ServerInfo;
 use Coding1688\DevTools\Collectors\SqlCollector;
 use Illuminate\Support\ServiceProvider;
@@ -22,10 +24,11 @@ class DevToolsServiceProvider extends ServiceProvider
 
         $this->app->scoped(SqlQueryProfiler::class);
         $this->app->singleton(ServerInfo::class);
+        $this->app->singleton(SecurityAuditor::class, fn (): SecurityAuditor => new SecurityAuditor((array) config('pl.devtools.security.checks', [])));
 
         $this->app->singleton(CollectorRegistry::class, fn (): CollectorRegistry => new CollectorRegistry(array_map(
             fn (string $class): Collector => $this->app->make($class),
-            (array) config('pl.devtools.collectors', [RequestCollector::class, SqlCollector::class, ServerCollector::class]),
+            (array) config('pl.devtools.collectors', [RequestCollector::class, SqlCollector::class, ServerCollector::class, SecurityCollector::class]),
         )));
 
         config(['pl.devtools.css' => $this->cssPath()]);
@@ -36,6 +39,8 @@ class DevToolsServiceProvider extends ServiceProvider
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'pl-devtools');
 
         if ($this->app->runningInConsole()) {
+            $this->commands([\Coding1688\DevTools\Console\AuditCommand::class]);
+
             $this->publishes([
                 __DIR__.'/../resources/views' => resource_path('views/vendor/pl-devtools'),
             ], 'pl-devtools-views');
