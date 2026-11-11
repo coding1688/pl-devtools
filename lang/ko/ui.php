@@ -150,4 +150,9 @@ return [
 ],
 'yes' => '예',
 'no' => '아니오',
+'stage' => [
+    'product_data' => '상품 데이터 준비',
+    'catalog_cards' => '카드 정리(상품 데이터 준비의 하위 단계)',
+    'blade' => 'Blade 컴파일 / 렌더링',
+],
 ];

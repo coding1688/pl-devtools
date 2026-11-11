@@ -1,5 +1,5 @@
 <p class="sql-debug-hint">{{ $t('sql.non_sql', ['ms' => $profile['non_sql_ms'] ?? '—']) }} · {{ $t('sql.collection', ['ms' => $data['collection_ms'] ?? '—']) }} · {{ $t('sql.peak', ['mb' => $profile['peak_memory_mb'] ?? '—']) }}</p>
-@php($stageLabels = array_merge(['product_data' => '产品业务数据准备', 'catalog_cards' => '卡片整理（业务数据准备的子阶段）', 'blade' => 'Blade 模板编译 / 渲染'], $data['stage_labels'] ?? []))
+@php($stageLabels = array_merge(['product_data' => $t('stage.product_data'), 'catalog_cards' => $t('stage.catalog_cards'), 'blade' => $t('stage.blade')], $data['stage_labels'] ?? []))
 @if(!empty($data['stages']))
     <h3 class="sql-debug-subtitle">{{ $t('sql.stages') }}</h3>
     <div class="sql-debug-table-wrap"><table class="sql-debug-table"><thead><tr><th>{{ $t('sql.stage') }}</th><th>{{ $t('sql.total') }}</th><th>{{ $t('sql.sql_ms') }}</th><th>{{ $t('sql.non_sql_ms') }}</th><th>{{ $t('sql.calls') }}</th></tr></thead><tbody>

@@ -150,4 +150,9 @@ return [
 ],
 'yes' => '是',
 'no' => '否',
+'stage' => [
+    'product_data' => '產品業務資料準備',
+    'catalog_cards' => '卡片整理（業務資料準備的子階段）',
+    'blade' => 'Blade 模板編譯 / 渲染',
+],
 ];

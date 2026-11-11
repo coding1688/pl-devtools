@@ -150,4 +150,9 @@ return [
 ],
 'yes' => 'yes',
 'no' => 'no',
+'stage' => [
+    'product_data' => 'Product data preparation',
+    'catalog_cards' => 'Card shaping (sub-stage of product data)',
+    'blade' => 'Blade compile / render',
+],
 ];
