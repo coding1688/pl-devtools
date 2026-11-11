@@ -156,6 +156,8 @@ return [
 | `toolbar_collectors` | `['request','sql','telemetry']` | 内联工具栏展示的面板（历史页始终展示全部） |
 | `toolbar_refresh` | `2` | 工具栏自动刷新轮询秒数；0 关闭（SPA / Layui iframe 切换时用于更新） |
 | `toolbar_history` | `20` | 工具栏下拉框里可选的最近请求条数 |
+| `ignore_routes` | `[]` | 不采集的路由名（支持 `admin.*` 通配） |
+| `ignore_paths` | `[]` | 不采集的路径模式（支持 `api/*`） |
 | `toolbar_in_iframes` | `true` | iframe 内是否显示工具栏；轮询只在顶层窗口运行 |
 | `diagnostics_ttl` | `300` | Server 诊断快照缓存秒数 |
 | `security.checks` | 12 项 | 启用的安全检查类 |

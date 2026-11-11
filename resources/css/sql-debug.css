@@ -58,3 +58,6 @@
 .sql-debug-severity-medium { background: #d97706; color: #fff; }
 .sql-debug-severity-low { background: #2563eb; color: #fff; }
 .sql-debug-severity-info { background: #64748b; color: #fff; }
+
+.sql-debug-selector { display: inline-flex; align-items: center; gap: 6px; margin-inline-start: auto; }
+.sql-debug-selector select { max-width: 380px; }

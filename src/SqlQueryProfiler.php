@@ -66,6 +66,18 @@ final class SqlQueryProfiler
         if (! config('pl.devtools.enabled') || ! config('app.debug')) {
             return false;
         }
+        if ($request->route() !== null) {
+            foreach ((array) config('pl.devtools.ignore_routes', []) as $route) {
+                if (is_string($route) && $route !== '' && $request->routeIs($route)) {
+                    return false;
+                }
+            }
+        }
+        foreach ((array) config('pl.devtools.ignore_paths', []) as $pattern) {
+            if (is_string($pattern) && $pattern !== '' && $request->is($pattern)) {
+                return false;
+            }
+        }
         $environments = array_values(array_filter((array) config('pl.devtools.environments', ['local', 'testing']), 'is_string'));
         if ($environments !== [] && ! app()->environment($environments)) {
             return false;
@@ -247,6 +259,13 @@ final class SqlQueryProfiler
     {
         $duration = (hrtime(true) - $this->startedAt) / 1e6;
         $this->recording = false;
+        if ($request->route() !== null) {
+            foreach ((array) config('pl.devtools.ignore_routes', []) as $route) {
+                if (is_string($route) && $route !== '' && $request->routeIs($route)) {
+                    return [];
+                }
+            }
+        }
         $stages = array_map(static function (array $stage): array {
             return [...$stage, 'duration_ms' => round($stage['duration_ms'], 2), 'sql_ms' => round($stage['sql_ms'], 2),
                 'non_sql_ms' => round(max(0, $stage['duration_ms'] - $stage['sql_ms']), 2)];

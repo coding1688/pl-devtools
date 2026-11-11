@@ -71,6 +71,10 @@ return [
     ],
     'security_ttl' => 300,
 
+    /* Route names or path patterns excluded from profiling (no toolbar, no profile). */
+    'ignore_routes' => [],
+    'ignore_paths' => [],
+
     /* Panels shown inside the inline toolbar; the history page shows all. */
     'toolbar_collectors' => ['request', 'sql', 'telemetry'],
 
