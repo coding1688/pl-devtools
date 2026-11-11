@@ -24,11 +24,15 @@ final class UploadExtensionCheck implements Check
 
     public function run(): array
     {
-        $allowed = array_map('strtolower', (array) config('files.uploads.allowed_extensions', []));
+        $key = (string) config('pl.devtools.security.upload_extensions_config', 'files.uploads.allowed_extensions');
+        if (! config()->has($key)) {
+            return ['status' => 'skip', 'detail' => 'not configured: '.$key];
+        }
+        $allowed = array_map('strtolower', (array) config($key, []));
         $dangerous = array_values(array_intersect($allowed, ['php', 'php3', 'php4', 'php5', 'php7', 'php8', 'phtml', 'pht', 'phar', 'html', 'htm', 'js', 'svg']));
 
         return $dangerous === []
             ? ['status' => 'pass', 'detail' => count($allowed).' extensions allowed']
-            : ['status' => 'fail', 'detail' => 'allowed: '.implode(', ', $dangerous), 'fix' => 'Remove executable extensions from files.uploads.allowed_extensions.'];
+            : ['status' => 'fail', 'detail' => 'allowed: '.implode(', ', $dangerous), 'fix' => 'Remove executable extensions from '.$key.'.'];
     }
 }

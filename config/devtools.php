@@ -68,6 +68,7 @@ return [
             \Coding1688\DevTools\Diagnostics\Security\Checks\ComposerAuditCheck::class,
         ],
         'composer_audit' => false,
+        'upload_extensions_config' => 'files.uploads.allowed_extensions',
     ],
     'security_ttl' => 300,
 
@@ -133,6 +134,9 @@ return [
     /* Filled by the service provider with the published or package CSS path. */
     'css' => null,
 
-    /* UI locale (en, zh_CN, zh_TW, ja, ko). Null follows the app locale. */
+    /* Optional locale list shown on the Server panel (host specific). */
+    'locales' => null,
+
+    /* UI locale (en, zh_CN, zh_TW, ja, ko). Null follows the browser language, then the app locale. */
     'locale' => null,
 ];

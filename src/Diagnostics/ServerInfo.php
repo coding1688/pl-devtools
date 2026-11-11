@@ -58,7 +58,7 @@ final class ServerInfo
                 'url' => (string) config('app.url'),
                 'locale' => app()->getLocale(),
                 'timezone' => (string) config('app.timezone'),
-                'locales' => count((array) config('platform.locales', [])),
+                'locales' => count((array) (config('pl.devtools.locales') ?? config('platform.locales', []))),
                 'phpunit' => app()->runningUnitTests(),
             ],
             'database' => $this->database(),

@@ -18,7 +18,7 @@
 <div class="sql-debug-table-wrap"><table class="sql-debug-table sql-debug-table-kv"><tbody>
     <tr><th>{{ $t('server.laravel') }}</th><td>{{ $app['version'] ?? '—' }} · {{ $app['environment'] ?? '—' }}@if($app['debug'] ?? false) · <span class="sql-debug-slow">APP_DEBUG=true</span>@endif</td></tr>
     <tr><th>{{ $t('server.url') }}</th><td>{{ $app['url'] ?? '—' }}</td></tr>
-    <tr><th>{{ $t('server.locale') }}</th><td>{{ $app['locale'] ?? '—' }} · {{ $app['timezone'] ?? '—' }} · {{ $app['locales'] ?? 0 }}</td></tr>
+    <tr><th>{{ $t('server.locale') }}</th><td>{{ $app['locale'] ?? '—' }} · {{ $app['timezone'] ?? '—' }}@if(($app['locales'] ?? 0) > 0) · {{ $app['locales'] }}@endif</td></tr>
 </tbody></table></div>
 
 <h3 class="sql-debug-subtitle">{{ $t('server.database') }}</h3>

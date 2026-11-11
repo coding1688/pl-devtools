@@ -45,6 +45,8 @@ Laravel 本地开发诊断工具：请求画像、SQL 时间线、服务器信�
 - 独立历史页（过滤、自动刷新、清空、导出 JSON）
 - `devtools:audit` 命令（CI 可用的安全门禁）
 
+本包不依赖宿主应用的模型、数据表、Service 或配置文件；只使用自己的 `pl.devtools` 默认值（启动时合并）、配置的 cache store、日志文件与数据库版本查询，因此可以放进任意 Laravel 11–13 项目。
+
 ## 安装
 
 ### 1. 通过 Composer 安装
@@ -295,6 +297,8 @@ jobs:
 | `logs.max_bytes` | `524288` | 只读尾部字节数 |
 | `security.checks` | 12 个检查类 | 启用的检查 |
 | `security.composer_audit` | `false` | 是否运行 `composer audit` |
+| `security.upload_extensions_config` | `files.uploads.allowed_extensions` | 上传检查读取的配置键；不存在时跳过 |
+| `locales` | `null` | Server 面板展示的语言列表（可选） |
 
 ## 扩展
 

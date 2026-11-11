@@ -24,6 +24,8 @@ Laravel 開発者向けの診断ツール：リクエストプロファイル、
 
 ツールバー、単体履歴ページ、`devtools:audit` コマンドも含みます。
 
+ホストアプリのモデル・テーブル・Service・設定ファイルには依存しません。自身の `pl.devtools` 既定値（起動時にマージ）、設定済みの cache store、ログファイル、DB のバージョン照会のみを使用するため、任意の Laravel 11–13 アプリに導入できます。
+
 ## 要件
 
 PHP 8.2+、Laravel 11 / 12 / 13。
@@ -134,6 +136,7 @@ php artisan devtools:audit --json --fresh
 | `environments` / `hosts` | `['local','testing']` / `[]` | 許可する環境とホスト |
 | `path` / `route_name` | `__debug/sql` / `debug.sql` | パスとルート名 |
 | `middleware` | `[]` | デバッグルートの追加ミドルウェア |
+| `locales` | `null` | Server パネルに表示する言語一覧（任意） |
 | `locale` | `null` | UI 言語：`en`、`zh_CN`、`zh_TW`、`ja`、`ko`。`null` はブラウザの Accept-Language → アプリの locale → 英語の順 |
 | `slow_ms` / `max_queries` | `100` / `500` | スロークエリ閾値 / 上限 |
 | `history_limit` / `ttl_seconds` | `50` / `1800` | 履歴件数 / 保持時間 |

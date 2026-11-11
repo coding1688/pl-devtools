@@ -28,6 +28,8 @@ Also included:
 - Standalone history page (filter, auto refresh, clear, export JSON)
 - `devtools:audit` command (CI gate)
 
+The package has no dependency on the host application's models, tables, services or config files. It only uses its own `pl.devtools` defaults (merged at boot), the configured cache store, the log file and the database version query — so it can be dropped into any Laravel 11–13 app.
+
 ## Requirements
 
 - PHP 8.2+
@@ -283,6 +285,8 @@ All keys live under `pl.devtools`.
 | `logs.max_bytes` | `524288` | Tail bytes read |
 | `security.checks` | 12 check classes | Enabled checks |
 | `security.composer_audit` | `false` | Run `composer audit` |
+| `security.upload_extensions_config` | `files.uploads.allowed_extensions` | Config key inspected by the upload check; skipped when absent |
+| `locales` | `null` | Optional locale list shown on the Server panel |
 
 ## Extending
 

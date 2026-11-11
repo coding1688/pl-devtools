@@ -24,6 +24,8 @@ Laravel 本機開發診斷工具：請求畫像、SQL 時間軸、伺服器資�
 
 另含：底部工具列、獨立歷史頁、`devtools:audit` 指令。
 
+本套件不依賴宿主應用的模型、資料表、Service 或設定檔；只使用自己的 `pl.devtools` 預設值（啟動時合併）、設定的 cache store、日誌檔與資料庫版本查詢，因此可放入任何 Laravel 11–13 專案。
+
 ## 需求
 
 PHP 8.2+，Laravel 11 / 12 / 13。
@@ -134,6 +136,7 @@ php artisan devtools:audit --json --fresh
 | `environments` / `hosts` | `['local','testing']` / `[]` | 允許的環境與網域 |
 | `path` / `route_name` | `__debug/sql` / `debug.sql` | 路徑與路由名 |
 | `middleware` | `[]` | 偵錯路由的額外中介層 |
+| `locales` | `null` | Server 面板顯示的語言清單（選填） |
 | `locale` | `null` | 介面語言：`en`、`zh_CN`、`zh_TW`、`ja`、`ko`；`null` 依序取瀏覽器 Accept-Language、應用 locale、英文 |
 | `slow_ms` / `max_queries` | `100` / `500` | 慢查詢門檻、單請求上限 |
 | `history_limit` / `ttl_seconds` | `50` / `1800` | 歷史筆數與保留時間 |
