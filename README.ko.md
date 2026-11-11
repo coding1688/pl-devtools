@@ -134,7 +134,7 @@ php artisan devtools:audit --json --fresh
 | `environments` / `hosts` | `['local','testing']` / `[]` | 허용 환경·호스트 |
 | `path` / `route_name` | `__debug/sql` / `debug.sql` | 경로·라우트 이름 |
 | `middleware` | `[]` | 디버그 라우트 추가 미들웨어 |
-| `locale` | `null` | UI 언어: `en`, `zh_CN`, `zh_TW`, `ja`, `ko`. `null`이면 앱 locale 사용 |
+| `locale` | `null` | UI 언어: `en`, `zh_CN`, `zh_TW`, `ja`, `ko`. `null`이면 브라우저 Accept-Language → 앱 locale → 영어 순 |
 | `slow_ms` / `max_queries` | `100` / `500` | 느린 쿼리 기준 / 요청당 한도 |
 | `history_limit` / `ttl_seconds` | `50` / `1800` | 기록 개수 / 보존 시간 |
 | `toolbar_refresh` / `toolbar_history` | `2` / `20` | 폴링 간격 / 선택 항목 수 |

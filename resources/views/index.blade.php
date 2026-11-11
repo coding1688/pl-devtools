@@ -1,7 +1,7 @@
 @php
     $collectors = $collectors ?? [];
     $visibleCollectors = $standalone ? $collectors : array_values(array_filter($collectors, fn ($item) => in_array($item->key(), (array) config('pl.devtools.toolbar_collectors', ['request', 'sql']), true)));
-    $locale = config('pl.devtools.locale') ?: app()->getLocale();
+    $locale = \Coding1688\DevTools\Locale::resolve(request());
     $t = function (string $key, array $replace = [], ?string $fallback = null) use ($locale): string {
         $full = 'devtools::ui.'.$key;
         if (\Illuminate\Support\Facades\Lang::has($full, $locale)) {

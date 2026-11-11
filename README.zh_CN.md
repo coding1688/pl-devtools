@@ -252,7 +252,7 @@ jobs:
 | `log` | `false` | 是否写入查询日志 |
 | `log_channel` | `single` | 日志通道 |
 | `css` | `null` | 自定义 CSS 文件路径 |
-| `locale` | `null` | 界面语言：`en`、`zh_CN`、`zh_TW`、`ja`、`ko`；`null` 跟随应用 locale |
+| `locale` | `null` | 界面语言：`en`、`zh_CN`、`zh_TW`、`ja`、`ko`；`null` 依次取浏览器 Accept-Language、应用 locale、英文 |
 
 ### 采集
 

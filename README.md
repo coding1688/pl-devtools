@@ -240,7 +240,7 @@ All keys live under `pl.devtools`.
 | `log` | `false` | Write the query log |
 | `log_channel` | `single` | Log channel |
 | `css` | `null` | Custom CSS path |
-| `locale` | `null` | UI locale: `en`, `zh_CN`, `zh_TW`, `ja`, `ko`; `null` follows the app locale |
+| `locale` | `null` | UI locale: `en`, `zh_CN`, `zh_TW`, `ja`, `ko`; `null` uses the browser `Accept-Language`, then the app locale, then English |
 
 ### Collection
 
