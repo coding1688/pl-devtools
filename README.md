@@ -146,6 +146,7 @@ return [
 | `collectors` | Request / SQL | 历史页面板顺序 |
 | `collect_request` | `true` | 是否记录 Request 面板数据 |
 | `toolbar_collectors` | `['request','sql','telemetry']` | 内联工具栏展示的面板（历史页始终展示全部） |
+| `toolbar_refresh` | `2` | 工具栏自动刷新轮询秒数；0 关闭（SPA 切换页面时用于更新） |
 | `diagnostics_ttl` | `300` | Server 诊断快照缓存秒数 |
 | `security.checks` | 12 项 | 启用的安全检查类 |
 | `security.composer_audit` | `false` | 是否运行 `composer audit` |

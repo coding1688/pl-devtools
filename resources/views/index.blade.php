@@ -5,7 +5,9 @@
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>开发工具</title>
 @if(($refresh ?? 0) > 0 && request()->query('request') === null)<meta http-equiv="refresh" content="{{ $refresh }}">@endif
 @endif
+@if(! ($fragment ?? false))
 <style>{!! is_string(config('pl.devtools.css')) && is_file(config('pl.devtools.css')) ? file_get_contents(config('pl.devtools.css')) : '' !!}</style>
+@endif
 @if($standalone)
 </head><body class="sql-debug-body"><main class="sql-debug-page">
     <h1>开发工具</h1>
@@ -23,7 +25,7 @@
         <form method="POST" action="{{ route((string) config('pl.devtools.route_name', 'devtools.index').'.clear') }}" class="sql-debug-inline-form">@csrf<button type="submit" class="sql-debug-link-button">清空历史</button></form>
     </p>
 @else
-<details class="sql-debug-widget" data-sql-debug>
+<details class="sql-debug-widget" data-sql-debug data-signature="{{ $profiles[0]['id'] ?? '' }}" data-refresh-url="{{ route((string) config('pl.devtools.route_name', 'devtools.index')) }}?toolbar=1">
     <summary>SQL {{ $profiles[0]['query_count'] }} 条 · {{ $profiles[0]['sql_ms'] }} ms <span>请求 {{ $profiles[0]['duration_ms'] }} ms</span>
         <span>非 SQL {{ $profiles[0]['non_sql_ms'] ?? '—' }} ms</span>
         <span>峰值 {{ $profiles[0]['peak_memory_mb'] ?? '—' }} MB</span> <span class="sql-debug-slow">慢 {{ $profiles[0]['slow_count'] }}</span> <span>重复 {{ $profiles[0]['repeated_count'] }}</span></summary>
@@ -60,5 +62,8 @@
 @else
     </div>
     @include('pl-devtools::partials.tabs-script')
+    @if(! ($fragment ?? false))
+        @include('pl-devtools::partials.toolbar-refresh')
+    @endif
 </details>
 @endif

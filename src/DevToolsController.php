@@ -21,6 +21,26 @@ class DevToolsController extends \Illuminate\Routing\Controller
         if ($request->boolean('fresh')) {
             $this->server->flush();
         }
+        if ($request->boolean('toolbar')) {
+            $latest = $this->profiler->recent();
+            if ($latest === []) {
+                return response()->noContent();
+            }
+            $counts = ['all' => count($latest), 'html' => 0, 'ajax' => 0];
+            foreach ($latest as $item) {
+                $type = (string) ($item['type'] ?? 'html');
+                $counts[$type] = ($counts[$type] ?? 0) + 1;
+            }
+
+            return response()->view('pl-devtools::index', [
+                'profiles' => [$latest[0]],
+                'counts' => $counts,
+                'standalone' => false,
+                'refresh' => 0,
+                'collectors' => $this->collectors->all(),
+                'fragment' => true,
+            ])->header('Cache-Control', 'private, no-store');
+        }
         $id = $request->query('request');
         abort_unless($id === null || (is_string($id) && preg_match('/^[a-f0-9-]{36}$/D', $id) === 1), 404);
         $profiles = $this->profiler->recent($id);

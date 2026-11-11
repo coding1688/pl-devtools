@@ -74,6 +74,9 @@ return [
     /* Panels shown inside the inline toolbar; the history page shows all. */
     'toolbar_collectors' => ['request', 'sql', 'telemetry'],
 
+    /* Seconds between toolbar auto-refresh polls; 0 disables polling. */
+    'toolbar_refresh' => 2,
+
     /* Seconds to cache the server diagnostics snapshot. */
     'diagnostics_ttl' => 300,
 
