@@ -54,21 +54,11 @@
     <p>暂无记录，请先访问一个页面或操作后台接口，再刷新这里。</p>
 @endforelse
 @if($standalone)
+@include('pl-devtools::partials.tabs-script')
 </main>
-<script>
-document.querySelectorAll('[data-devtools-tabs]').forEach(function (root) {
-    var tabs = root.querySelectorAll('[data-devtools-tab]');
-    var panels = root.querySelectorAll('[data-devtools-panel]');
-    tabs.forEach(function (tab) {
-        tab.addEventListener('click', function () {
-            tabs.forEach(function (other) { other.classList.toggle('is-active', other === tab); });
-            panels.forEach(function (panel) { panel.hidden = panel.getAttribute('data-devtools-panel') !== tab.getAttribute('data-devtools-tab'); });
-        });
-    });
-});
-</script>
 </body></html>
 @else
     </div>
+    @include('pl-devtools::partials.tabs-script')
 </details>
 @endif

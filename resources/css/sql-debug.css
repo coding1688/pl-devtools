@@ -13,8 +13,9 @@
 .sql-debug-table { width: 100%; border-collapse: collapse; text-align: left; font: 12px/1.6 system-ui, sans-serif; }
 .sql-debug-table th,.sql-debug-table td { padding: 8px 10px; border-bottom: 1px solid #e3e9ed; vertical-align: top; }
 .sql-debug-table th { white-space: nowrap; background: #f5f7f9; }
+.sql-debug-table-kv { table-layout: fixed; }
 .sql-debug-table-kv th { width: 150px; }
-.sql-debug-table-kv td { white-space: normal; overflow-wrap: anywhere; }
+.sql-debug-table-kv td { white-space: normal; overflow-wrap: anywhere; word-break: break-word; }
 .sql-debug-table-queries td:nth-child(1), .sql-debug-table-queries td:nth-child(2), .sql-debug-table-queries td:nth-child(3) { width: 70px; white-space: nowrap; }
 .sql-debug-table-checks td:nth-child(1) { width: 92px; }
 .sql-debug-table-checks td:nth-child(2) { width: 64px; }
