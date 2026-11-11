@@ -27,7 +27,7 @@ class DevToolsServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->mergeConfigFrom(__DIR__.'/../config/devtools.php', 'pl.devtools');
+        $this->mergeDevToolsConfig();
 
         $this->app->scoped(SqlQueryProfiler::class);
         $this->app->singleton(ServerInfo::class);
@@ -50,6 +50,34 @@ class DevToolsServiceProvider extends ServiceProvider
         )));
 
         config(['pl.devtools.css' => $this->cssPath()]);
+    }
+
+    private function mergeDevToolsConfig(): void
+    {
+        $defaults = require __DIR__.'/../config/devtools.php';
+        $override = (array) config('pl.devtools', []);
+        config(['pl.devtools' => $this->mergeConfigMap($defaults, $override)]);
+    }
+
+    /**
+     * Deep-merge maps but replace lists, so partial nested overrides keep the defaults.
+     *
+     * @param  array<string, mixed>  $defaults
+     * @param  array<string, mixed>  $override
+     * @return array<string, mixed>
+     */
+    private function mergeConfigMap(array $defaults, array $override): array
+    {
+        foreach ($override as $key => $value) {
+            $current = $defaults[$key] ?? null;
+            if (is_array($value) && is_array($current) && ! array_is_list($value) && ! array_is_list($current)) {
+                $defaults[$key] = $this->mergeConfigMap($current, $value);
+            } else {
+                $defaults[$key] = $value;
+            }
+        }
+
+        return $defaults;
     }
 
     public function boot(): void

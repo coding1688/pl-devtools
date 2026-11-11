@@ -288,6 +288,12 @@ All keys live under `pl.devtools`.
 | `security.upload_extensions_config` | `files.uploads.allowed_extensions` | Config key inspected by the upload check; skipped when absent |
 | `locales` | `null` | Optional locale list shown on the Server panel |
 
+## Publishing and merging
+
+- No `pl-*` package publishes `config/pl.php`; that file is host-owned and is never overwritten by `vendor:publish`.
+- `pl.devtools` merges deeply: maps are merged, lists are replaced. A partial override such as `['security' => ['composer_audit' => true]]` keeps the built-in checks.
+- Package-specific publishes: `pl-files` → `config/files.php` (`files-config`), `pl-devtools` → views/assets. `pl-fields` publishes nothing.
+
 ## Extending
 
 ### Custom panel

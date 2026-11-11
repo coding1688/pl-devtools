@@ -300,6 +300,12 @@ jobs:
 | `security.upload_extensions_config` | `files.uploads.allowed_extensions` | 上传检查读取的配置键；不存在时跳过 |
 | `locales` | `null` | Server 面板展示的语言列表（可选） |
 
+## 发布与合并
+
+- 三个 `pl-*` 包都不会发布 `config/pl.php`；该文件由宿主维护，`vendor:publish` 不会覆盖它。
+- `pl.devtools` 采用深合并：映射合并、列表替换。只写 `['security' => ['composer_audit' => true]]` 这类局部覆盖时会保留内置检查项。
+- 各包自己的发布项：`pl-files` → `config/files.php`（`files-config`），`pl-devtools` → 视图/资源；`pl-fields` 不发布配置。
+
 ## 扩展
 
 ### 自定义面板
