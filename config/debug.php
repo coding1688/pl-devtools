@@ -20,6 +20,19 @@ return [
     /* Extra middleware for the history route; add auth in shared environments. */
     'middleware' => [],
 
+    /* Show which controller handled the request. */
+    'show_controller' => true,
+
+    /* Record the authenticated user; set user_guards to [] to disable. */
+    'track_user' => true,
+    'user_guards' => ['backend', 'web', 'partner'],
+
+    /* How many duplicate-query groups to surface per request. */
+    'duplicate_groups' => 5,
+
+    /* Optional labels for custom measure() stages. */
+    'stage_labels' => [],
+
     'slow_ms' => 100,
     'max_queries' => 500,
     'max_sql_length' => 16384,

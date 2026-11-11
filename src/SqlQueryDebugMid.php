@@ -30,6 +30,7 @@ class SqlQueryDebugMid
             $profile = $this->profiler->finish($request, isset($response) ? $response->getStatusCode() : 500);
         }
         $response->headers->set('X-Debug-SQL-Request', $profile['id']);
+        $response->headers->set('X-Debug-SQL-Url', url((string) config('pl.debug.path', '__debug/sql')).'?request='.$profile['id']);
         $response->headers->set('X-Debug-SQL-Count', (string) $profile['query_count']);
         $response->headers->set('X-Debug-SQL-Time', (string) $profile['sql_ms']);
         $response->headers->set('Server-Timing', 'sql;dur='.$profile['sql_ms'].', app;dur='.$profile['duration_ms'].', non_sql;dur='.$profile['non_sql_ms'], false);

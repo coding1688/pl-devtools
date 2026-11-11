@@ -46,6 +46,9 @@ APP_DEBUG=true
 
 开启后：
 
+- **HTML 与 AJAX 请求都会记录**：AJAX 响应没有工具栏，但会出现在历史页，并带上 `X-Debug-SQL-Url` 响应头指向该次画像；
+- 历史页支持 `?type=all|html|ajax` 过滤，并显示三类计数；
+- 每个画像显示 `controller@action`、登录用户（可配置关闭）、重复查询分组（按语句结构聚合次数与总耗时）；
 - 每个 HTML 响应底部会注入一个可折叠工具栏（SQL 条数、SQL 耗时、请求耗时、非 SQL 耗时、Blade 耗时、峰值内存、慢查询、重复查询）；
 - 响应头带上 `X-Debug-SQL-Request`、`X-Debug-SQL-Count`、`X-Debug-SQL-Time` 和 `Server-Timing`；
 - 打开 `/{path}`（默认 `/__debug/sql`）查看最近请求的历史，`?request={id}` 查看单条；
@@ -95,6 +98,10 @@ return [
 | `ttl_seconds` | `1800` | 画像保留时间 |
 | `store_cache` | `true` | 是否写入缓存 |
 | `log` / `log_channel` | `false` / `single` | 是否写日志及通道 |
+| `show_controller` | `true` | 是否显示控制器/方法 |
+| `track_user` / `user_guards` | `true` / `['backend','web','partner']` | 是否记录登录用户及检查的 guard |
+| `duplicate_groups` | `5` | 每个请求展示的重复查询分组数 |
+| `stage_labels` | `[]` | `measure()` 阶段名的显示标签 |
 | `exclude_paths` | `[]` | 归因时忽略的应用文件 |
 
 ## 视图与样式

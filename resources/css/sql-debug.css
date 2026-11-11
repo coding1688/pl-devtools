@@ -21,3 +21,7 @@
 .sql-debug-request>p { padding: 0 12px; }
 .sql-debug-widget summary:focus-visible,.sql-debug-request summary:focus-visible { outline: 2px solid #438bc5; outline-offset: -2px; }
 @media (max-width: 640px) { .sql-debug-widget>summary { font-size: 11px; padding: 7px 8px; } .sql-debug-widget>summary>span { margin-inline-start: 6px; } .sql-debug-panel { padding: 6px; } }
+
+.sql-debug-kind { display: inline-block; padding: 0 6px; border-radius: 4px; font-size: 10px; font-weight: 700; letter-spacing: .04em; background: #e2e8f0; color: #152331; vertical-align: 1px; }
+.sql-debug-kind-ajax { background: #1d4ed8; color: #f8fafc; }
+.sql-debug-subtitle { margin: 14px 0 6px; font-size: 13px; font-weight: 700; }

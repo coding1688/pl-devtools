@@ -24,6 +24,10 @@ final class SqlQueryProfiler
 
     private array $patterns = [];
 
+    private array $patternSql = [];
+
+    private array $patternMs = [];
+
     private array $stages = [];
 
     private array $activeStages = [];
@@ -71,7 +75,7 @@ final class SqlQueryProfiler
         $this->startedAt = hrtime(true);
         $this->count = $this->slowCount = 0;
         $this->milliseconds = 0;
-        $this->queries = $this->patterns = $this->stages = $this->activeStages = [];
+        $this->queries = $this->patterns = $this->patternSql = $this->patternMs = $this->stages = $this->activeStages = [];
         $this->collectionMilliseconds = 0;
     }
 
@@ -87,6 +91,8 @@ final class SqlQueryProfiler
             $this->slowCount += $event->time >= config('pl.debug.slow_ms') ? 1 : 0;
             $fingerprint = hash('sha256', $event->sql);
             $this->patterns[$fingerprint] = ($this->patterns[$fingerprint] ?? 0) + 1;
+            $this->patternSql[$fingerprint] ??= $event->sql;
+            $this->patternMs[$fingerprint] = ($this->patternMs[$fingerprint] ?? 0) + (float) $event->time;
             if (count($this->queries) >= config('pl.debug.max_queries')) {
                 return;
             }
@@ -106,6 +112,65 @@ final class SqlQueryProfiler
         } finally {
             $this->collectionMilliseconds += (hrtime(true) - $startedAt) / 1e6;
         }
+    }
+
+    private function requestType(Request $request): string
+    {
+        return $request->expectsJson() || $request->ajax() ? 'ajax' : 'html';
+    }
+
+    private function controllerName(Request $request): ?string
+    {
+        if (! config('pl.debug.show_controller', true)) {
+            return null;
+        }
+        $action = $request->route()?->getActionName();
+
+        if (! is_string($action) || $action === '' || $action === 'Closure') {
+            return null;
+        }
+        $parts = explode('@', $action);
+        $controller = class_basename($parts[0]);
+
+        return count($parts) > 1 ? $controller.'@'.$parts[1] : $controller;
+    }
+
+    /** @return array{guard: string, id: int|string}|null */
+    private function actor(Request $request): ?array
+    {
+        if (! config('pl.debug.track_user', true)) {
+            return null;
+        }
+        foreach ((array) config('pl.debug.user_guards', ['backend', 'web', 'partner']) as $guard) {
+            if (! is_string($guard) || $guard === '' || ! array_key_exists($guard, (array) config('auth.guards', []))) {
+                continue;
+            }
+            $id = $request->user($guard)?->getAuthIdentifier();
+            if ($id !== null) {
+                return ['guard' => $guard, 'id' => $id];
+            }
+        }
+
+        return null;
+    }
+
+    /** @return list<array{sql: string, count: int, ms: float}> */
+    private function duplicateGroups(): array
+    {
+        $groups = [];
+        foreach ($this->patterns as $fingerprint => $count) {
+            if ($count < 2) {
+                continue;
+            }
+            $groups[] = [
+                'sql' => Str::limit((string) ($this->patternSql[$fingerprint] ?? ''), 240, ' …'),
+                'count' => $count,
+                'ms' => round((float) ($this->patternMs[$fingerprint] ?? 0), 2),
+            ];
+        }
+        usort($groups, fn (array $first, array $second): int => $second['ms'] <=> $first['ms']);
+
+        return array_slice($groups, 0, (int) config('pl.debug.duplicate_groups', 5));
     }
 
     private function isExcludedSource(string $file): bool
@@ -142,6 +207,7 @@ final class SqlQueryProfiler
         $profile = [
             'id' => (string) Str::uuid(), 'created_at' => now()->toIso8601String(), 'host' => $request->getHost(),
             'method' => $request->method(), 'path' => $path, 'route' => $request->route()?->getName(), 'status' => $status,
+            'type' => $this->requestType($request), 'controller' => $this->controllerName($request), 'user' => $this->actor($request),
             'duration_ms' => round($duration, 2), 'query_count' => $this->count,
             'non_sql_ms' => round(max(0, $duration - $this->milliseconds), 2),
             'collection_ms' => round($this->collectionMilliseconds, 2),
@@ -149,7 +215,7 @@ final class SqlQueryProfiler
             'stages' => $stages,
             'sql_ms' => round($this->milliseconds, 2), 'slow_count' => $this->slowCount,
             'repeated_count' => array_sum(array_map(fn (int $count): int => max(0, $count - 1), $this->patterns)),
-            'queries' => $queries,
+            'queries' => $queries, 'duplicates' => $this->duplicateGroups(),
         ];
         $this->persist($profile, $queries);
 

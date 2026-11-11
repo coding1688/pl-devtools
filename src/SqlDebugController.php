@@ -15,8 +15,17 @@ class SqlDebugController extends \Illuminate\Routing\Controller
         $id = $request->query('request');
         abort_unless($id === null || (is_string($id) && preg_match('/^[a-f0-9-]{36}$/D', $id) === 1), 404);
         $profiles = $this->profiler->recent($id);
-        $response = $request->expectsJson() ? response()->json(['profiles' => $profiles])
-            : response()->view('pl-debug::sql-debug', ['profiles' => $profiles, 'standalone' => true]);
+        $counts = ['all' => count($profiles), 'html' => 0, 'ajax' => 0];
+        foreach ($profiles as $profile) {
+            $type = (string) ($profile['type'] ?? 'html');
+            $counts[$type] = ($counts[$type] ?? 0) + 1;
+        }
+        $type = $request->query('type');
+        if (in_array($type, ['html', 'ajax'], true)) {
+            $profiles = array_values(array_filter($profiles, fn (array $profile): bool => ($profile['type'] ?? 'html') === $type));
+        }
+        $response = $request->expectsJson() ? response()->json(['profiles' => $profiles, 'counts' => $counts])
+            : response()->view('pl-debug::sql-debug', ['profiles' => $profiles, 'counts' => $counts, 'standalone' => true]);
 
         return $response->header('Cache-Control', 'private, no-store')->header('X-Robots-Tag', 'noindex, nofollow');
     }
