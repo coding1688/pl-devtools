@@ -1,6 +1,6 @@
 @php($counts = $data['counts'] ?? [])
 <p class="sql-debug-hint">只读检查 · 生成于 {{ $data['generated_at'] ?? '—' }} · 通过 {{ $counts['pass'] ?? 0 }} · 失败 {{ $counts['fail'] ?? 0 }} · 跳过 {{ $counts['skip'] ?? 0 }}</p>
-<div class="sql-debug-table-wrap"><table class="sql-debug-table"><thead><tr><th>级别</th><th>结论</th><th>检查项 / 说明</th></tr></thead><tbody>
+<div class="sql-debug-table-wrap"><table class="sql-debug-table sql-debug-table-checks"><thead><tr><th>级别</th><th>结论</th><th>检查项 / 说明</th></tr></thead><tbody>
     @foreach(($data['checks'] ?? []) as $check)
         <tr>
             <td><span class="sql-debug-severity sql-debug-severity-{{ $check['severity'] }}">{{ strtoupper($check['severity']) }}</span></td>

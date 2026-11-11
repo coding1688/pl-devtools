@@ -13,7 +13,13 @@
 .sql-debug-table { width: 100%; border-collapse: collapse; text-align: left; font: 12px/1.6 system-ui, sans-serif; }
 .sql-debug-table th,.sql-debug-table td { padding: 8px 10px; border-bottom: 1px solid #e3e9ed; vertical-align: top; }
 .sql-debug-table th { white-space: nowrap; background: #f5f7f9; }
-.sql-debug-table td:nth-child(-n+3) { width: 70px; white-space: nowrap; }
+.sql-debug-table-kv th { width: 150px; }
+.sql-debug-table-kv td { white-space: normal; overflow-wrap: anywhere; }
+.sql-debug-table-queries td:nth-child(1), .sql-debug-table-queries td:nth-child(2), .sql-debug-table-queries td:nth-child(3) { width: 70px; white-space: nowrap; }
+.sql-debug-table-checks td:nth-child(1) { width: 92px; }
+.sql-debug-table-checks td:nth-child(2) { width: 64px; }
+.sql-debug-table-logs td:nth-child(1) { width: 170px; white-space: nowrap; }
+.sql-debug-table-logs td:nth-child(2) { width: 90px; }
 .sql-debug-table pre { min-width: 240px; max-height: 260px; margin: 0 0 5px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; color: #153d55; background: transparent; font: 12px/1.6 ui-monospace, Consolas, monospace; user-select: text; }
 .sql-debug-table small { color: #667983; font-size: 11px; }
 .sql-debug-slow { color: #c41c35; font-weight: 650; }

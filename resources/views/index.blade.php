@@ -27,7 +27,7 @@
     <summary>SQL {{ $profiles[0]['query_count'] }} 条 · {{ $profiles[0]['sql_ms'] }} ms <span>请求 {{ $profiles[0]['duration_ms'] }} ms</span>
         <span>非 SQL {{ $profiles[0]['non_sql_ms'] ?? '—' }} ms</span>
         <span>峰值 {{ $profiles[0]['peak_memory_mb'] ?? '—' }} MB</span> <span class="sql-debug-slow">慢 {{ $profiles[0]['slow_count'] }}</span> <span>重复 {{ $profiles[0]['repeated_count'] }}</span></summary>
-    <div class="sql-debug-panel"><p>仅本地开发环境 · <a href="{{ route((string) config('pl.devtools.route_name', 'devtools.index')) }}" target="_blank" rel="noopener">全部请求 / 接口</a></p>
+    <div class="sql-debug-panel"><p>仅本地开发环境 · <a href="{{ route((string) config('pl.devtools.route_name', 'devtools.index')) }}" target="_blank" rel="noopener">全部面板与历史请求（Server / Security / Performance / Logs）</a></p>
 @endif
 @forelse($profiles as $profile)
     <details class="sql-debug-request" @if(count($profiles) === 1) open @endif>

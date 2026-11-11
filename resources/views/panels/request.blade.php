@@ -1,4 +1,4 @@
-<div class="sql-debug-table-wrap"><table class="sql-debug-table"><tbody>
+<div class="sql-debug-table-wrap"><table class="sql-debug-table sql-debug-table-kv"><tbody>
     <tr><th>请求</th><td><code>{{ $data['method'] }} {{ $data['path'] }}</code></td></tr>
     <tr><th>状态</th><td>{{ $data['status'] }} · {{ strtoupper((string) $data['type']) }}</td></tr>
     <tr><th>路由</th><td>{{ $data['route'] ?? '—' }}</td></tr>
@@ -9,7 +9,7 @@
 </tbody></table></div>
 @if(!empty($data['headers']))
     <h3 class="sql-debug-subtitle">请求头</h3>
-    <div class="sql-debug-table-wrap"><table class="sql-debug-table"><tbody>
+    <div class="sql-debug-table-wrap"><table class="sql-debug-table sql-debug-table-kv"><tbody>
         @foreach($data['headers'] as $name => $value)
             <tr><th>{{ $name }}</th><td>{{ $value }}</td></tr>
         @endforeach
@@ -19,7 +19,7 @@
     <h3 class="sql-debug-subtitle">中间件</h3>
     <p class="sql-debug-hint">{{ implode(' → ', $data['middleware']) }}</p>
 @endif
-<div class="sql-debug-table-wrap"><table class="sql-debug-table"><tbody>
+<div class="sql-debug-table-wrap"><table class="sql-debug-table sql-debug-table-kv"><tbody>
     <tr><th>查询参数</th><td>{{ $data['query_keys'] === [] ? '—' : implode(', ', $data['query_keys']) }}</td></tr>
     <tr><th>提交字段</th><td>{{ $data['input_keys'] === [] ? '—' : implode(', ', $data['input_keys']) }}</td></tr>
 </tbody></table></div>

@@ -3,7 +3,7 @@
 @php($db = $data['database'] ?? [])
 @php($services = $data['services'] ?? [])
 <h3 class="sql-debug-subtitle">运行环境</h3>
-<div class="sql-debug-table-wrap"><table class="sql-debug-table"><tbody>
+<div class="sql-debug-table-wrap"><table class="sql-debug-table sql-debug-table-kv"><tbody>
     <tr><th>PHP</th><td>{{ $php['version'] ?? '—' }} · {{ $php['sapi'] ?? '—' }} · {{ $php['bits'] ?? '—' }} bit</td></tr>
     <tr><th>系统</th><td>{{ $php['os'] ?? '—' }} · {{ $php['hostname'] ?? '—' }} · {{ $php['server'] ?? '—' }}</td></tr>
     <tr><th>负载</th><td>{{ $php['load'] ? "{$php['load']['1']} / {$php['load']['5']} / {$php['load']['15']}" : '—' }}</td></tr>
@@ -15,20 +15,20 @@
 </tbody></table></div>
 
 <h3 class="sql-debug-subtitle">应用</h3>
-<div class="sql-debug-table-wrap"><table class="sql-debug-table"><tbody>
+<div class="sql-debug-table-wrap"><table class="sql-debug-table sql-debug-table-kv"><tbody>
     <tr><th>Laravel</th><td>{{ $app['version'] ?? '—' }} · {{ $app['environment'] ?? '—' }}@if($app['debug'] ?? false) · <span class="sql-debug-slow">APP_DEBUG=true</span>@endif</td></tr>
     <tr><th>APP_URL</th><td>{{ $app['url'] ?? '—' }}</td></tr>
     <tr><th>Locale / 时区</th><td>{{ $app['locale'] ?? '—' }} · {{ $app['timezone'] ?? '—' }} · {{ $app['locales'] ?? 0 }} 种语言</td></tr>
 </tbody></table></div>
 
 <h3 class="sql-debug-subtitle">数据库</h3>
-<div class="sql-debug-table-wrap"><table class="sql-debug-table"><tbody>
+<div class="sql-debug-table-wrap"><table class="sql-debug-table sql-debug-table-kv"><tbody>
     <tr><th>连接</th><td>{{ $db['connection'] ?? '—' }} · {{ $db['driver'] ?? '—' }}</td></tr>
     <tr><th>版本</th><td>{{ $db['version'] ?? '—' }}</td></tr>
 </tbody></table></div>
 
 <h3 class="sql-debug-subtitle">服务驱动</h3>
-<div class="sql-debug-table-wrap"><table class="sql-debug-table"><tbody>
+<div class="sql-debug-table-wrap"><table class="sql-debug-table sql-debug-table-kv"><tbody>
     <tr><th>Cache</th><td>{{ $services['cache'] ?? '—' }}</td></tr>
     <tr><th>Queue</th><td>{{ $services['queue'] ?? '—' }}</td></tr>
     <tr><th>Session</th><td>{{ $services['session'] ?? '—' }} · secure={{ ($services['session_secure'] ?? false) ? 'true' : 'false' }}</td></tr>
@@ -53,7 +53,7 @@
 @php($opcache = $data['opcache'] ?? ['enabled' => false])
 <h3 class="sql-debug-subtitle">OPcache</h3>
 @if($opcache['enabled'] ?? false)
-    <div class="sql-debug-table-wrap"><table class="sql-debug-table"><tbody>
+    <div class="sql-debug-table-wrap"><table class="sql-debug-table sql-debug-table-kv"><tbody>
         <tr><th>命中率</th><td>{{ $opcache['hit_rate'] ?? '—' }}</td></tr>
         <tr><th>缓存脚本</th><td>{{ $opcache['cached_scripts'] ?? 0 }}</td></tr>
         <tr><th>内存使用</th><td>{{ $opcache['memory_used'] ?? '—' }} / {{ $opcache['memory_total'] ?? '—' }}（{{ $opcache['memory'] ?? '—' }}）</td></tr>

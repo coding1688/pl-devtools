@@ -72,7 +72,7 @@ return [
     'security_ttl' => 300,
 
     /* Panels shown inside the inline toolbar; the history page shows all. */
-    'toolbar_collectors' => ['request', 'sql'],
+    'toolbar_collectors' => ['request', 'sql', 'telemetry'],
 
     /* Seconds to cache the server diagnostics snapshot. */
     'diagnostics_ttl' => 300,

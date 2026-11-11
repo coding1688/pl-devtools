@@ -39,7 +39,7 @@
     </tbody></table></div>
 @endif
 <h3 class="sql-debug-subtitle">查询明细</h3>
-<div class="sql-debug-table-wrap"><table class="sql-debug-table"><thead><tr><th>执行顺序</th><th>耗时</th><th>重复</th><th>SQL / 调用位置</th></tr></thead><tbody>
+<div class="sql-debug-table-wrap"><table class="sql-debug-table sql-debug-table-queries"><thead><tr><th>执行顺序</th><th>耗时</th><th>重复</th><th>SQL / 调用位置</th></tr></thead><tbody>
     @foreach($data['queries'] as $query)
         <tr><td>{{ $query['number'] }}</td><td @class(['sql-debug-slow' => $query['ms'] >= $data['slow_ms']])>{{ $query['ms'] }} ms</td><td>{{ $query['repetitions'] }}</td><td><pre>{{ $query['sql'] }}</pre><small>{{ $query['source'] ?? '—' }} · {{ $query['connection'] }} · {{ $query['parameter_count'] }} 个参数</small></td></tr>
     @endforeach
