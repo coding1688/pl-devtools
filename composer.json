@@ -37,12 +37,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Coding1688\\Debug\\": "src/"
+            "Coding1688\\DevTools\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Coding1688\\Debug\\Tests\\": "tests/"
+            "Coding1688\\DevTools\\Tests\\": "tests/"
         }
     },
     "extra": {
