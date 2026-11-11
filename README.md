@@ -344,7 +344,7 @@ $data = $profiler->measure('product_data', fn () => $service->prepare($id));
 
 - Laravel 11 / 12 / 13，PHP 8.2+
 - 语义化版本：`0.x` 的 minor 增加功能，patch 修复问题
-- 当前版本：`v0.11.1`
+- 版本记录见 [Tags](https://github.com/coding1688/pl-devtools/tags)
 
 ## 相关包
 
