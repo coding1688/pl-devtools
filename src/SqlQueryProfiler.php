@@ -243,7 +243,7 @@ final class SqlQueryProfiler
     }
 
     /** @return array<string, mixed> */
-    public function finish(Request $request, int $status): array
+    public function finish(Request $request, int $status, array $extra = []): array
     {
         $duration = (hrtime(true) - $this->startedAt) / 1e6;
         $this->recording = false;
@@ -275,6 +275,7 @@ final class SqlQueryProfiler
             'sql_ms' => round($this->milliseconds, 2), 'slow_count' => $this->slowCount,
             'repeated_count' => array_sum(array_map(fn (int $count): int => max(0, $count - 1), $this->patterns)),
             'queries' => $queries, 'duplicates' => $this->duplicateGroups(), 'hotspots' => $this->hotspots(),
+            'telemetry' => $extra,
         ];
         $this->persist($profile, $queries);
 

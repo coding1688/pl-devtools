@@ -14,7 +14,7 @@
         <a href="?type=html">页面 {{ $counts['html'] ?? 0 }}</a> ·
         <a href="?type=ajax">AJAX {{ $counts['ajax'] ?? 0 }}</a>
     </p>
-    <p>绑定参数不展开。慢查询阈值 {{ config('pl.devtools.slow_ms') }} ms。<a href="{{ route((string) config('pl.devtools.route_name', 'devtools.index')) }}?fresh=1">刷新全部请求</a></p>
+    <p>绑定参数不展开。慢查询阈值 {{ config('pl.devtools.slow_ms') }} ms。<a href="{{ route((string) config('pl.devtools.route_name', 'devtools.index')) }}?fresh=1">刷新全部请求</a> · <a href="{{ request()->fullUrlWithQuery(['export' => 'json']) }}">导出 JSON</a></p>
     <p class="sql-debug-controls">自动刷新：
         @foreach([0 => '关闭', 2 => '2 秒', 5 => '5 秒'] as $seconds => $label)
             <a href="{{ request()->fullUrlWithQuery(['refresh' => $seconds]) }}">{{ $label }}</a>@if(! $loop->last) · @endif
@@ -32,6 +32,7 @@
 @forelse($profiles as $profile)
     <details class="sql-debug-request" @if(count($profiles) === 1) open @endif>
         <summary><span class="sql-debug-kind" @class(['sql-debug-kind-ajax' => ($profile['type'] ?? 'html') === 'ajax'])>{{ ($profile['type'] ?? 'html') === 'ajax' ? 'AJAX' : 'HTML' }}</span> <b>{{ $profile['method'] }} {{ $profile['path'] }}</b> · {{ $profile['status'] }} · 请求 {{ $profile['duration_ms'] }} ms · SQL {{ $profile['sql_ms'] }} ms / {{ $profile['query_count'] }} 条 · <span class="sql-debug-slow">慢 {{ $profile['slow_count'] }}</span> · 重复 {{ $profile['repeated_count'] }}<small>{{ $profile['host'] }} · {{ $profile['created_at'] }}</small></summary>
+        <p class="sql-debug-hint"><a href="{{ request()->fullUrlWithQuery(['request' => $profile['id'], 'export' => 'json']) }}">导出该请求 JSON</a></p>
         @if($collectors === [])
             <p>没有可用的面板，请检查 <code>pl.devtools.collectors</code> 配置。</p>
         @else

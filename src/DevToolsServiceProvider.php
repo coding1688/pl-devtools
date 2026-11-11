@@ -11,13 +11,16 @@ use Coding1688\DevTools\Collectors\CollectorRegistry;
 use Coding1688\DevTools\Collectors\RequestCollector;
 use Coding1688\DevTools\Collectors\LogsCollector;
 use Coding1688\DevTools\Collectors\PerformanceCollector;
+use Coding1688\DevTools\Collectors\TelemetryCollector;
 use Coding1688\DevTools\Collectors\SecurityCollector;
 use Coding1688\DevTools\Collectors\ServerCollector;
 use Coding1688\DevTools\Diagnostics\LogSummary;
+use Coding1688\DevTools\Telemetry\RequestTelemetry;
 use Coding1688\DevTools\Diagnostics\PerformanceAggregator;
 use Coding1688\DevTools\Diagnostics\Security\SecurityAuditor;
 use Coding1688\DevTools\Diagnostics\ServerInfo;
 use Coding1688\DevTools\Collectors\SqlCollector;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
 class DevToolsServiceProvider extends ServiceProvider
@@ -30,6 +33,7 @@ class DevToolsServiceProvider extends ServiceProvider
         $this->app->singleton(ServerInfo::class);
         $this->app->singleton(PerformanceAggregator::class);
         $this->app->singleton(LogSummary::class);
+        $this->app->scoped(RequestTelemetry::class);
         $this->app->singleton(SecurityAuditor::class, fn (): SecurityAuditor => new SecurityAuditor((array) config('pl.devtools.security.checks', [])));
 
         $this->app->singleton(CollectorRegistry::class, fn (): CollectorRegistry => new CollectorRegistry(array_map(
@@ -39,6 +43,7 @@ class DevToolsServiceProvider extends ServiceProvider
                 SqlCollector::class,
                 ServerCollector::class,
                 SecurityCollector::class,
+                TelemetryCollector::class,
                 PerformanceCollector::class,
                 LogsCollector::class,
             ]),
@@ -71,6 +76,8 @@ class DevToolsServiceProvider extends ServiceProvider
             app(SqlQueryProfiler::class)->record($query);
         });
 
+        $this->listenTelemetry();
+
         $this->app->make(Kernel::class)->prependMiddleware(DevToolsMid::class);
 
         Route::middleware(array_merge(['web'], (array) config('pl.devtools.middleware', [])))
@@ -80,6 +87,36 @@ class DevToolsServiceProvider extends ServiceProvider
         Route::middleware(array_merge(['web'], (array) config('pl.devtools.middleware', [])))
             ->post((string) config('pl.devtools.path', '__debug/sql').'/clear', [DevToolsController::class, 'clear'])
             ->name((string) config('pl.devtools.route_name', 'debug.sql').'.clear');
+    }
+
+    private function listenTelemetry(): void
+    {
+        if (! config('pl.devtools.telemetry.enabled', true)) {
+            return;
+        }
+        $events = [];
+        if (config('pl.devtools.telemetry.http', true)) {
+            $events = [...$events,
+                \Illuminate\Http\Client\Events\RequestSending::class,
+                \Illuminate\Http\Client\Events\ResponseReceived::class,
+                \Illuminate\Http\Client\Events\ConnectionFailed::class,
+            ];
+        }
+        if (config('pl.devtools.telemetry.cache', true)) {
+            $events = [...$events,
+                \Illuminate\Cache\Events\CacheHit::class,
+                \Illuminate\Cache\Events\CacheMissed::class,
+                \Illuminate\Cache\Events\KeyWritten::class,
+                \Illuminate\Cache\Events\KeyForgotten::class,
+            ];
+        }
+        foreach ($events as $event) {
+            if (class_exists($event)) {
+                Event::listen($event, static function (object $payload): void {
+                    app(RequestTelemetry::class)->handle($payload);
+                });
+            }
+        }
     }
 
     private function cssPath(): string

@@ -52,6 +52,7 @@ APP_DEBUG=true
 | `SQL` | 条数/耗时/慢查询、阶段耗时、N+1 调用位置热点、时间线、重复查询分组、查询明细 |
 | `Server` | PHP/SAPI/OS/负载、Laravel 版本与环境、DB 连接与版本、cache/queue/session/fs 驱动、磁盘可用与可写、PHP 扩展、OPcache 命中率 |
 | `Security` | 只读安全检查：环境/密钥/会话 Cookie/HTTPS、调试工具暴露、存储与公开目录、DB 账号、上传白名单、生产驱动、哈希强度、（可选）依赖漏洞 |
+| `HTTP / Cache` | 本请求的外发 HTTP 调用（方法/地址/状态/耗时/失败原因）与缓存命中计数 |
 | `Performance` | 跨请求聚合：最慢请求、最慢查询、重复最多的语句 |
 | `Logs` | 应用日志尾部摘要：按级别计数 + 最近条目（只保留首行并截断） |
 
@@ -92,6 +93,8 @@ php artisan devtools:audit --fail-on=medium  # 中危及以上返回非 0
 php artisan devtools:audit --fail-on=none    # 只报告，不失败
 php artisan devtools:audit --json --fresh    # JSON 输出，忽略缓存
 ```
+
+画像导出：历史页顶部的「导出 JSON」导出当前筛选下的全部请求；每条请求详情的「导出该请求 JSON」导出单条（响应带 `Content-Disposition` 附件头）。
 
 - 全部检查只读，不修改任何配置；不读取数据库密码。
 - 结果按 `diagnostics_ttl`/`security_ttl` 缓存，`--fresh` 或页面 `?fresh=1` 强制重算。
@@ -147,6 +150,9 @@ return [
 | `security.checks` | 12 项 | 启用的安全检查类 |
 | `security.composer_audit` | `false` | 是否运行 `composer audit` |
 | `security_ttl` | `300` | 安全检查结果缓存秒数 |
+| `telemetry.enabled` | `true` | 是否采集 HTTP/缓存遥测 |
+| `telemetry.http` / `telemetry.cache` | `true` | 分别开关 HTTP 与缓存事件 |
+| `telemetry.max_http` | `20` | 单请求最多记录的 HTTP 调用数 |
 | `performance.top` | `10` | Performance 面板每类排行条数 |
 | `logs.path` | `storage/logs/laravel.log` | 日志文件 |
 | `logs.levels` | `ERROR/CRITICAL/ALERT/EMERGENCY/WARNING` | 采集的日志级别 |

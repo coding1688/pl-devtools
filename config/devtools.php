@@ -27,8 +27,17 @@ return [
         \Coding1688\DevTools\Collectors\SqlCollector::class,
         \Coding1688\DevTools\Collectors\ServerCollector::class,
         \Coding1688\DevTools\Collectors\SecurityCollector::class,
+        \Coding1688\DevTools\Collectors\TelemetryCollector::class,
         \Coding1688\DevTools\Collectors\PerformanceCollector::class,
         \Coding1688\DevTools\Collectors\LogsCollector::class,
+    ],
+
+    /* Per-request HTTP client and cache telemetry. */
+    'telemetry' => [
+        'enabled' => true,
+        'http' => true,
+        'cache' => true,
+        'max_http' => 20,
     ],
 
     /* Cross-request aggregation shown in the Performance panel. */

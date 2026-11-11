@@ -30,7 +30,7 @@ class DevToolsMid
         try {
             $response = $next($request);
         } finally {
-            $profile = $this->profiler->finish($request, isset($response) ? $response->getStatusCode() : 500);
+            $profile = $this->profiler->finish($request, isset($response) ? $response->getStatusCode() : 500, app(\Coding1688\DevTools\Telemetry\RequestTelemetry::class)->snapshot());
         }
         $response->headers->set('X-Debug-SQL-Request', $profile['id']);
         $response->headers->set('X-Debug-SQL-Url', url((string) config('pl.devtools.path', '__debug/sql')).'?request='.$profile['id']);

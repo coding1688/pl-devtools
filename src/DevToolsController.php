@@ -35,6 +35,15 @@ class DevToolsController extends \Illuminate\Routing\Controller
         if (in_array($type, ['html', 'ajax'], true)) {
             $profiles = array_values(array_filter($profiles, fn (array $profile): bool => ($profile['type'] ?? 'html') === $type));
         }
+        if ($request->query('export') === 'json') {
+            return response()->json([
+                'exported_at' => now()->toIso8601String(),
+                'profiles' => $profiles,
+            ], 200, [
+                'Content-Disposition' => 'attachment; filename="devtools-profile-'.now()->format('Ymd-His').'.json"',
+                'Cache-Control' => 'private, no-store',
+            ]);
+        }
         $response = $request->expectsJson() ? response()->json(['profiles' => $profiles, 'counts' => $counts])
             : response()->view('pl-devtools::index', ['profiles' => $profiles, 'counts' => $counts, 'standalone' => true, 'refresh' => $refresh, 'collectors' => $this->collectors->all()]);
 
