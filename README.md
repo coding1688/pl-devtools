@@ -58,6 +58,14 @@ APP_DEBUG=true
 
 Request 面板只记录**字段名与白名单请求头**，不记录参数值、Cookie 或会话内容。
 
+## 工具栏
+
+底部工具栏默认跟随最新请求，并提供一个「查看」下拉框：
+
+- `自动（最新）`：每 `toolbar_refresh` 秒刷新到最新请求；
+- 选择某条历史请求：锁定该条，停止自动跟随；可随时切回自动；
+- 展开/收起状态、当前选中项在刷新后都会保留。
+
 ## 使用
 
 开启后：
@@ -147,6 +155,7 @@ return [
 | `collect_request` | `true` | 是否记录 Request 面板数据 |
 | `toolbar_collectors` | `['request','sql','telemetry']` | 内联工具栏展示的面板（历史页始终展示全部） |
 | `toolbar_refresh` | `2` | 工具栏自动刷新轮询秒数；0 关闭（SPA / Layui iframe 切换时用于更新） |
+| `toolbar_history` | `20` | 工具栏下拉框里可选的最近请求条数 |
 | `toolbar_in_iframes` | `true` | iframe 内是否显示工具栏；轮询只在顶层窗口运行 |
 | `diagnostics_ttl` | `300` | Server 诊断快照缓存秒数 |
 | `security.checks` | 12 项 | 启用的安全检查类 |

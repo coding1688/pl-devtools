@@ -77,6 +77,9 @@ return [
     /* Show the toolbar inside iframes (Layui/layer tabs); polling only runs in the top window. */
     'toolbar_in_iframes' => true,
 
+    /* Number of recent requests offered in the toolbar selector. */
+    'toolbar_history' => 20,
+
     /* Seconds between toolbar auto-refresh polls; 0 disables polling. */
     'toolbar_refresh' => 2,
 

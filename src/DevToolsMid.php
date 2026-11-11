@@ -47,6 +47,8 @@ class DevToolsMid
                 'standalone' => false,
                 'refresh' => 0,
                 'collectors' => $this->collectors->all(),
+                'recent' => array_slice($this->profiler->recent(), 0, max(1, (int) config('pl.devtools.toolbar_history', 20))),
+                'selected' => $profile['id'],
             ])->render();
             $position = strripos($content, '</body>');
             $response->setContent(substr($content, 0, $position).$toolbar.substr($content, $position));
