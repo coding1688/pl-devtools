@@ -52,6 +52,8 @@ APP_DEBUG=true
 | `SQL` | 条数/耗时/慢查询、阶段耗时、N+1 调用位置热点、时间线、重复查询分组、查询明细 |
 | `Server` | PHP/SAPI/OS/负载、Laravel 版本与环境、DB 连接与版本、cache/queue/session/fs 驱动、磁盘可用与可写、PHP 扩展、OPcache 命中率 |
 | `Security` | 只读安全检查：环境/密钥/会话 Cookie/HTTPS、调试工具暴露、存储与公开目录、DB 账号、上传白名单、生产驱动、哈希强度、（可选）依赖漏洞 |
+| `Performance` | 跨请求聚合：最慢请求、最慢查询、重复最多的语句 |
+| `Logs` | 应用日志尾部摘要：按级别计数 + 最近条目（只保留首行并截断） |
 
 Request 面板只记录**字段名与白名单请求头**，不记录参数值、Cookie 或会话内容。
 
@@ -145,6 +147,11 @@ return [
 | `security.checks` | 12 项 | 启用的安全检查类 |
 | `security.composer_audit` | `false` | 是否运行 `composer audit` |
 | `security_ttl` | `300` | 安全检查结果缓存秒数 |
+| `performance.top` | `10` | Performance 面板每类排行条数 |
+| `logs.path` | `storage/logs/laravel.log` | 日志文件 |
+| `logs.levels` | `ERROR/CRITICAL/ALERT/EMERGENCY/WARNING` | 采集的日志级别 |
+| `logs.limit` | `50` | 展示条数 |
+| `logs.max_bytes` | `524288` | 只读取日志尾部字节数 |
 | `exclude_paths` | `[]` | 归因时忽略的应用文件 |
 
 ## 视图与样式

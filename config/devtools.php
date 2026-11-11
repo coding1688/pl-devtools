@@ -27,6 +27,19 @@ return [
         \Coding1688\DevTools\Collectors\SqlCollector::class,
         \Coding1688\DevTools\Collectors\ServerCollector::class,
         \Coding1688\DevTools\Collectors\SecurityCollector::class,
+        \Coding1688\DevTools\Collectors\PerformanceCollector::class,
+        \Coding1688\DevTools\Collectors\LogsCollector::class,
+    ],
+
+    /* Cross-request aggregation shown in the Performance panel. */
+    'performance' => ['top' => 10],
+
+    /* Application log tail shown in the Logs panel. */
+    'logs' => [
+        'path' => null,
+        'levels' => ['ERROR', 'CRITICAL', 'ALERT', 'EMERGENCY', 'WARNING'],
+        'limit' => 50,
+        'max_bytes' => 524288,
     ],
 
     /* Security diagnostics: read-only checks, reused by devtools:audit. */

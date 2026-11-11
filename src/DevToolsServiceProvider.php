@@ -9,8 +9,12 @@ use Illuminate\Support\Facades\Route;
 use Coding1688\DevTools\Collectors\Collector;
 use Coding1688\DevTools\Collectors\CollectorRegistry;
 use Coding1688\DevTools\Collectors\RequestCollector;
+use Coding1688\DevTools\Collectors\LogsCollector;
+use Coding1688\DevTools\Collectors\PerformanceCollector;
 use Coding1688\DevTools\Collectors\SecurityCollector;
 use Coding1688\DevTools\Collectors\ServerCollector;
+use Coding1688\DevTools\Diagnostics\LogSummary;
+use Coding1688\DevTools\Diagnostics\PerformanceAggregator;
 use Coding1688\DevTools\Diagnostics\Security\SecurityAuditor;
 use Coding1688\DevTools\Diagnostics\ServerInfo;
 use Coding1688\DevTools\Collectors\SqlCollector;
@@ -24,11 +28,20 @@ class DevToolsServiceProvider extends ServiceProvider
 
         $this->app->scoped(SqlQueryProfiler::class);
         $this->app->singleton(ServerInfo::class);
+        $this->app->singleton(PerformanceAggregator::class);
+        $this->app->singleton(LogSummary::class);
         $this->app->singleton(SecurityAuditor::class, fn (): SecurityAuditor => new SecurityAuditor((array) config('pl.devtools.security.checks', [])));
 
         $this->app->singleton(CollectorRegistry::class, fn (): CollectorRegistry => new CollectorRegistry(array_map(
             fn (string $class): Collector => $this->app->make($class),
-            (array) config('pl.devtools.collectors', [RequestCollector::class, SqlCollector::class, ServerCollector::class, SecurityCollector::class]),
+            (array) config('pl.devtools.collectors', [
+                RequestCollector::class,
+                SqlCollector::class,
+                ServerCollector::class,
+                SecurityCollector::class,
+                PerformanceCollector::class,
+                LogsCollector::class,
+            ]),
         )));
 
         config(['pl.devtools.css' => $this->cssPath()]);
