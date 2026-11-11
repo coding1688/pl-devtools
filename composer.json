@@ -1,16 +1,25 @@
 {
-    "name": "coding1688/pl-debug",
-    "description": "Opt-in SQL query profiler with a request toolbar and a history page for Laravel applications.",
+    "name": "coding1688/pl-devtools",
+    "description": "Opt-in Laravel developer tools: request profiler, SQL timeline, server and security diagnostics.",
     "type": "library",
     "license": "MIT",
-    "keywords": ["laravel", "debug", "sql", "profiler", "performance"],
-    "authors": [
-        { "name": "coding1688" }
+    "keywords": [
+        "laravel",
+        "devtools",
+        "debug",
+        "sql",
+        "profiler",
+        "diagnostics"
     ],
-    "homepage": "https://github.com/coding1688/pl-debug",
+    "authors": [
+        {
+            "name": "coding1688"
+        }
+    ],
+    "homepage": "https://github.com/coding1688/pl-devtools",
     "support": {
-        "issues": "https://github.com/coding1688/pl-debug/issues",
-        "source": "https://github.com/coding1688/pl-debug"
+        "issues": "https://github.com/coding1688/pl-devtools/issues",
+        "source": "https://github.com/coding1688/pl-devtools"
     },
     "require": {
         "php": "^8.2",
@@ -39,7 +48,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Coding1688\\Debug\\DebugServiceProvider"
+                "Coding1688\\DevTools\\DevToolsServiceProvider"
             ]
         }
     },

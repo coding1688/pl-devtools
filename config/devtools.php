@@ -21,6 +21,12 @@ return [
     'middleware' => [],
 
     /* Show which controller handled the request. */
+    /* Collectors rendered as tabs on the history page. */
+    'collectors' => [\Coding1688\DevTools\Collectors\RequestCollector::class, \Coding1688\DevTools\Collectors\SqlCollector::class],
+
+    /* Record request headers/lists for the Request panel (values stay masked). */
+    'collect_request' => true,
+
     'show_controller' => true,
 
     /* Record the authenticated user; set user_guards to [] to disable. */

@@ -1,6 +1,6 @@
 <?php
 
-namespace Coding1688\Debug;
+namespace Coding1688\DevTools;
 
 use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Http\Request;
@@ -63,14 +63,14 @@ final class SqlQueryProfiler
 
     public function enabledFor(Request $request): bool
     {
-        if (! config('pl.debug.enabled') || ! config('app.debug')) {
+        if (! config('pl.devtools.enabled') || ! config('app.debug')) {
             return false;
         }
-        $environments = array_values(array_filter((array) config('pl.debug.environments', ['local', 'testing']), 'is_string'));
+        $environments = array_values(array_filter((array) config('pl.devtools.environments', ['local', 'testing']), 'is_string'));
         if ($environments !== [] && ! app()->environment($environments)) {
             return false;
         }
-        $hosts = array_values(array_filter((array) config('pl.debug.hosts', []), 'is_string'));
+        $hosts = array_values(array_filter((array) config('pl.devtools.hosts', []), 'is_string'));
 
         return $hosts === [] || in_array($request->getHost(), $hosts, true);
     }
@@ -90,19 +90,19 @@ final class SqlQueryProfiler
         if (! $this->recording) {
             return;
         }
-        if (config('pl.debug.ignore_impossible_queries', false) && preg_match('/where\s+0\s*=\s*1/i', $event->sql) === 1) {
+        if (config('pl.devtools.ignore_impossible_queries', false) && preg_match('/where\s+0\s*=\s*1/i', $event->sql) === 1) {
             return;
         }
         $startedAt = hrtime(true);
         try {
             $this->count++;
             $this->milliseconds += (float) $event->time;
-            $this->slowCount += $event->time >= config('pl.debug.slow_ms') ? 1 : 0;
+            $this->slowCount += $event->time >= config('pl.devtools.slow_ms') ? 1 : 0;
             $fingerprint = hash('sha256', $event->sql);
             $this->patterns[$fingerprint] = ($this->patterns[$fingerprint] ?? 0) + 1;
             $this->patternSql[$fingerprint] ??= $event->sql;
             $this->patternMs[$fingerprint] = ($this->patternMs[$fingerprint] ?? 0) + (float) $event->time;
-            if (count($this->queries) >= config('pl.debug.max_queries')) {
+            if (count($this->queries) >= config('pl.devtools.max_queries')) {
                 return;
             }
             $source = null;
@@ -119,7 +119,7 @@ final class SqlQueryProfiler
             $this->sourceMs[$sourceKey] = ($this->sourceMs[$sourceKey] ?? 0) + (float) $event->time;
             $this->sourceSql[$sourceKey] ??= $event->sql;
             $this->queries[] = [
-                'number' => $this->count, 'sql' => Str::limit($event->sql, config('pl.debug.max_sql_length'), ' …'),
+                'number' => $this->count, 'sql' => Str::limit($event->sql, config('pl.devtools.max_sql_length'), ' …'),
                 'ms' => round((float) $event->time, 3), 'connection' => $event->connectionName,
                 'parameter_count' => count($event->bindings), 'fingerprint' => $fingerprint, 'source' => $source,
                 'start_ms' => round($offset, 3),
@@ -129,6 +129,29 @@ final class SqlQueryProfiler
         }
     }
 
+    /** @return array<string, mixed> */
+    private function requestDetails(Request $request): array
+    {
+        if (! config('pl.devtools.collect_request', true)) {
+            return [];
+        }
+        $headers = [];
+        foreach (['accept', 'content-type', 'x-requested-with', 'referer', 'user-agent'] as $name) {
+            $value = $request->headers->get($name);
+            if (is_string($value) && $value !== '') {
+                $headers[$name] = Str::limit($value, 160);
+            }
+        }
+
+        return [
+            'ip' => $request->ip(),
+            'headers' => $headers,
+            'middleware' => array_values(array_map('strval', (array) $request->route()?->gatherMiddleware())),
+            'query_keys' => array_keys($request->query()),
+            'input_keys' => array_keys(array_diff_key($request->all(), $request->allFiles())),
+        ];
+    }
+
     private function requestType(Request $request): string
     {
         return $request->expectsJson() || $request->ajax() ? 'ajax' : 'html';
@@ -136,7 +159,7 @@ final class SqlQueryProfiler
 
     private function controllerName(Request $request): ?string
     {
-        if (! config('pl.debug.show_controller', true)) {
+        if (! config('pl.devtools.show_controller', true)) {
             return null;
         }
         $action = $request->route()?->getActionName();
@@ -153,10 +176,10 @@ final class SqlQueryProfiler
     /** @return array{guard: string, id: int|string}|null */
     private function actor(Request $request): ?array
     {
-        if (! config('pl.debug.track_user', true)) {
+        if (! config('pl.devtools.track_user', true)) {
             return null;
         }
-        foreach ((array) config('pl.debug.user_guards', ['backend', 'web', 'partner']) as $guard) {
+        foreach ((array) config('pl.devtools.user_guards', ['backend', 'web', 'partner']) as $guard) {
             if (! is_string($guard) || $guard === '' || ! array_key_exists($guard, (array) config('auth.guards', []))) {
                 continue;
             }
@@ -185,7 +208,7 @@ final class SqlQueryProfiler
         }
         usort($groups, fn (array $first, array $second): int => $second['ms'] <=> $first['ms']);
 
-        return array_slice($groups, 0, (int) config('pl.debug.duplicate_groups', 5));
+        return array_slice($groups, 0, (int) config('pl.devtools.duplicate_groups', 5));
     }
 
     /** @return list<array{source: string, count: int, ms: float, sql: string}> */
@@ -205,12 +228,12 @@ final class SqlQueryProfiler
         }
         usort($groups, fn (array $first, array $second): int => $second['ms'] <=> $first['ms']);
 
-        return array_slice($groups, 0, (int) config('pl.debug.hotspots', 5));
+        return array_slice($groups, 0, (int) config('pl.devtools.hotspots', 5));
     }
 
     private function isExcludedSource(string $file): bool
     {
-        foreach ((array) config('pl.debug.exclude_paths', []) as $path) {
+        foreach ((array) config('pl.devtools.exclude_paths', []) as $path) {
             if (is_string($path) && $path !== '' && str_starts_with($file, $path)) {
                 return true;
             }
@@ -243,6 +266,7 @@ final class SqlQueryProfiler
             'id' => (string) Str::uuid(), 'created_at' => now()->toIso8601String(), 'host' => $request->getHost(),
             'method' => $request->method(), 'path' => $path, 'route' => $request->route()?->getName(), 'status' => $status,
             'type' => $this->requestType($request), 'controller' => $this->controllerName($request), 'user' => $this->actor($request),
+            'request' => $this->requestDetails($request),
             'duration_ms' => round($duration, 2), 'query_count' => $this->count,
             'non_sql_ms' => round(max(0, $duration - $this->milliseconds), 2),
             'collection_ms' => round($this->collectionMilliseconds, 2),
@@ -264,22 +288,22 @@ final class SqlQueryProfiler
     private function persist(array $profile, array $queries): void
     {
         try {
-            if (config('pl.debug.store_cache', true)) {
-                $cache = Cache::store(config('pl.debug.cache_store'));
-                $cache->put('sql-debug:'.$profile['id'], $profile, config('pl.debug.ttl_seconds'));
+            if (config('pl.devtools.store_cache', true)) {
+                $cache = Cache::store(config('pl.devtools.cache_store'));
+                $cache->put('sql-debug:'.$profile['id'], $profile, config('pl.devtools.ttl_seconds'));
                 $cache->lock('sql-debug:history-lock', 5)->block(1, function () use ($cache, $profile): void {
                     $ids = [$profile['id'], ...$cache->get('sql-debug:history', [])];
-                    $limit = max(1, (int) config('pl.debug.history_limit'));
-                    $cache->put('sql-debug:history', array_slice($ids, 0, $limit), config('pl.debug.ttl_seconds'));
+                    $limit = max(1, (int) config('pl.devtools.history_limit'));
+                    $cache->put('sql-debug:history', array_slice($ids, 0, $limit), config('pl.devtools.ttl_seconds'));
                     foreach (array_slice($ids, $limit) as $expired) {
                         $cache->forget('sql-debug:'.$expired);
                     }
                 });
             }
-            if (config('pl.debug.log', false)) {
-                Log::channel((string) config('pl.debug.log_channel', 'single'))->info('HTTP SQL profile', [
+            if (config('pl.devtools.log', false)) {
+                Log::channel((string) config('pl.devtools.log_channel', 'single'))->info('HTTP SQL profile', [
                     ...array_diff_key($profile, ['queries' => true]),
-                    'slow_queries' => array_slice(array_values(array_filter($queries, fn (array $query): bool => $query['ms'] >= config('pl.debug.slow_ms'))), 0, 10),
+                    'slow_queries' => array_slice(array_values(array_filter($queries, fn (array $query): bool => $query['ms'] >= config('pl.devtools.slow_ms'))), 0, 10),
                 ]);
             }
         } catch (\Throwable $exception) {
@@ -289,7 +313,7 @@ final class SqlQueryProfiler
 
     public function clear(): void
     {
-        $cache = Cache::store(config('pl.debug.cache_store'));
+        $cache = Cache::store(config('pl.devtools.cache_store'));
         foreach ((array) $cache->get('sql-debug:history', []) as $id) {
             $cache->forget('sql-debug:'.$id);
         }
@@ -299,7 +323,7 @@ final class SqlQueryProfiler
     /** @return list<array<string, mixed>> */
     public function recent(?string $id = null): array
     {
-        $cache = Cache::store(config('pl.debug.cache_store'));
+        $cache = Cache::store(config('pl.devtools.cache_store'));
         $ids = $id !== null ? [$id] : $cache->get('sql-debug:history', []);
         $profiles = [];
         foreach ($ids as $key) {

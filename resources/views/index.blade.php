@@ -1,0 +1,72 @@
+@php($collectors = $collectors ?? [])
+@if($standalone)
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>开发工具</title>
+@if(($refresh ?? 0) > 0 && request()->query('request') === null)<meta http-equiv="refresh" content="{{ $refresh }}">@endif
+@endif
+<style>{!! is_string(config('pl.devtools.css')) && is_file(config('pl.devtools.css')) ? file_get_contents(config('pl.devtools.css')) : '' !!}</style>
+@if($standalone)
+</head><body class="sql-debug-body"><main class="sql-debug-page">
+    <h1>开发工具</h1>
+    <p>最近 {{ config('pl.devtools.history_limit') }} 个请求，包含 AJAX 接口。
+        <a href="?type=all">全部 {{ $counts['all'] ?? 0 }}</a> ·
+        <a href="?type=html">页面 {{ $counts['html'] ?? 0 }}</a> ·
+        <a href="?type=ajax">AJAX {{ $counts['ajax'] ?? 0 }}</a>
+    </p>
+    <p>绑定参数不展开。慢查询阈值 {{ config('pl.devtools.slow_ms') }} ms。<a href="{{ route((string) config('pl.devtools.route_name', 'devtools.index')) }}">刷新全部请求</a></p>
+    <p class="sql-debug-controls">自动刷新：
+        @foreach([0 => '关闭', 2 => '2 秒', 5 => '5 秒'] as $seconds => $label)
+            <a href="{{ request()->fullUrlWithQuery(['refresh' => $seconds]) }}">{{ $label }}</a>@if(! $loop->last) · @endif
+        @endforeach
+        @if(($refresh ?? 0) > 0) · 每 {{ $refresh }} 秒自动刷新 @endif
+        <form method="POST" action="{{ route((string) config('pl.devtools.route_name', 'devtools.index').'.clear') }}" class="sql-debug-inline-form">@csrf<button type="submit" class="sql-debug-link-button">清空历史</button></form>
+    </p>
+@else
+<details class="sql-debug-widget" data-sql-debug>
+    <summary>SQL {{ $profiles[0]['query_count'] }} 条 · {{ $profiles[0]['sql_ms'] }} ms <span>请求 {{ $profiles[0]['duration_ms'] }} ms</span>
+        <span>非 SQL {{ $profiles[0]['non_sql_ms'] ?? '—' }} ms</span>
+        <span>峰值 {{ $profiles[0]['peak_memory_mb'] ?? '—' }} MB</span> <span class="sql-debug-slow">慢 {{ $profiles[0]['slow_count'] }}</span> <span>重复 {{ $profiles[0]['repeated_count'] }}</span></summary>
+    <div class="sql-debug-panel"><p>仅本地开发环境 · <a href="{{ route((string) config('pl.devtools.route_name', 'devtools.index')) }}" target="_blank" rel="noopener">全部请求 / 接口</a></p>
+@endif
+@forelse($profiles as $profile)
+    <details class="sql-debug-request" @if(count($profiles) === 1) open @endif>
+        <summary><span class="sql-debug-kind" @class(['sql-debug-kind-ajax' => ($profile['type'] ?? 'html') === 'ajax'])>{{ ($profile['type'] ?? 'html') === 'ajax' ? 'AJAX' : 'HTML' }}</span> <b>{{ $profile['method'] }} {{ $profile['path'] }}</b> · {{ $profile['status'] }} · 请求 {{ $profile['duration_ms'] }} ms · SQL {{ $profile['sql_ms'] }} ms / {{ $profile['query_count'] }} 条 · <span class="sql-debug-slow">慢 {{ $profile['slow_count'] }}</span> · 重复 {{ $profile['repeated_count'] }}<small>{{ $profile['host'] }} · {{ $profile['created_at'] }}</small></summary>
+        @if($collectors === [])
+            <p>没有可用的面板，请检查 <code>pl.devtools.collectors</code> 配置。</p>
+        @else
+            <div class="devtools" data-devtools-tabs>
+                <nav class="devtools-tabs">
+                    @foreach($collectors as $collector)
+                        <button type="button" class="devtools-tab @if($loop->first) is-active @endif" data-devtools-tab="{{ $collector->key() }}">{{ $collector->label() }}</button>
+                    @endforeach
+                </nav>
+                @foreach($collectors as $collector)
+                    <section class="devtools-panel" data-devtools-panel="{{ $collector->key() }}" @if(! $loop->first) hidden @endif>
+                        @include($collector->view(), ['data' => $collector->collect($profile), 'profile' => $profile])
+                    </section>
+                @endforeach
+            </div>
+        @endif
+    </details>
+@empty
+    <p>暂无记录，请先访问一个页面或操作后台接口，再刷新这里。</p>
+@endforelse
+@if($standalone)
+</main>
+<script>
+document.querySelectorAll('[data-devtools-tabs]').forEach(function (root) {
+    var tabs = root.querySelectorAll('[data-devtools-tab]');
+    var panels = root.querySelectorAll('[data-devtools-panel]');
+    tabs.forEach(function (tab) {
+        tab.addEventListener('click', function () {
+            tabs.forEach(function (other) { other.classList.toggle('is-active', other === tab); });
+            panels.forEach(function (panel) { panel.hidden = panel.getAttribute('data-devtools-panel') !== tab.getAttribute('data-devtools-tab'); });
+        });
+    });
+});
+</script>
+</body></html>
+@else
+    </div>
+</details>
+@endif

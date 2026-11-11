@@ -1,4 +1,4 @@
-# coding1688/pl-debug
+# coding1688/pl-devtools
 
 Laravel 请求级 SQL 性能分析：记录每个请求的 SQL 条数、耗时、慢查询、重复查询与阶段耗时，并在页面底部注入工具栏，另提供历史页。
 
@@ -12,16 +12,16 @@ Laravel 请求级 SQL 性能分析：记录每个请求的 SQL 条数、耗时�
 ```json
 {
     "repositories": [
-        { "type": "vcs", "url": "https://github.com/coding1688/pl-debug.git" }
+        { "type": "vcs", "url": "https://github.com/coding1688/pl-devtools.git" }
     ],
     "require": {
-        "coding1688/pl-debug": "^0.1"
+        "coding1688/pl-devtools": "^0.1"
     }
 }
 ```
 
 ```bash
-composer update coding1688/pl-debug
+composer update coding1688/pl-devtools
 ```
 
 包会自动注册 `Coding1688\Debug\DebugServiceProvider`。
@@ -41,6 +41,17 @@ APP_DEBUG=true
 4. 请求 host 在 `pl.debug.hosts` 内（默认为空，表示不限制）。
 
 > 生产/预发环境不要开。若要开，至少同时设置 `hosts` 和 `middleware`（例如 `['backend.auth']`）。
+
+## 面板
+
+历史页的每个请求按面板展示（`pl.devtools.collectors` 控制顺序）：
+
+| 面板 | 内容 |
+| --- | --- |
+| `Request` | 方法/路径/状态/路由/控制器/用户、请求头白名单、中间件、查询与提交字段名、IP |
+| `SQL` | 条数/耗时/慢查询、阶段耗时、N+1 调用位置热点、时间线、重复查询分组、查询明细 |
+
+Request 面板只记录**字段名与白名单请求头**，不记录参数值、Cookie 或会话内容。
 
 ## 使用
 
@@ -108,6 +119,8 @@ return [
 | `ignore_impossible_queries` | `false` | 忽略 `where 0 = 1` 这类恒假查询 |
 | `refresh_seconds` | `0` | 历史页自动刷新间隔（0 关闭） |
 | `stage_labels` | `[]` | `measure()` 阶段名的显示标签 |
+| `collectors` | Request / SQL | 历史页面板顺序 |
+| `collect_request` | `true` | 是否记录 Request 面板数据 |
 | `exclude_paths` | `[]` | 归因时忽略的应用文件 |
 
 ## 视图与样式
@@ -123,4 +136,4 @@ php artisan vendor:publish --tag=pl-debug-assets  # resource/css/sql-debug.css
 
 - [pl-files](https://github.com/coding1688/pl-files)：上传、引用追踪、多磁盘存储、多云复制
 - [pl-fields](https://github.com/coding1688/pl-fields)：字段类型注册与选项来源
-- pl-debug（本包）
+- pl-devtools（本包）

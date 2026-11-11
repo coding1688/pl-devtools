@@ -1,6 +1,6 @@
 <?php
 
-namespace Coding1688\Debug;
+namespace Coding1688\DevTools;
 
 use Illuminate\View\Engines\CompilerEngine;
 

@@ -36,3 +36,8 @@
 .sql-debug-timeline-track { position: relative; height: 12px; background: #e6ecf2; border-radius: 3px; overflow: hidden; }
 .sql-debug-timeline-bar { position: absolute; top: 0; bottom: 0; background: #2563eb; border-radius: 2px; }
 .sql-debug-timeline-ms { color: #334155; font-size: 11px; text-align: right; }
+
+.devtools-tabs { display: flex; gap: 4px; margin: 8px 0 0; border-bottom: 1px solid #d7dee6; }
+.devtools-tab { padding: 6px 12px; border: 0; border-bottom: 2px solid transparent; background: none; color: #334155; font: inherit; cursor: pointer; }
+.devtools-tab.is-active { border-bottom-color: #1d4ed8; color: #1d4ed8; font-weight: 600; }
+.devtools-panel { padding: 8px 0 4px; }
