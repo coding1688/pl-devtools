@@ -28,6 +28,12 @@ final class SqlQueryProfiler
 
     private array $patternMs = [];
 
+    private array $sourceCount = [];
+
+    private array $sourceMs = [];
+
+    private array $sourceSql = [];
+
     private array $stages = [];
 
     private array $activeStages = [];
@@ -75,13 +81,16 @@ final class SqlQueryProfiler
         $this->startedAt = hrtime(true);
         $this->count = $this->slowCount = 0;
         $this->milliseconds = 0;
-        $this->queries = $this->patterns = $this->patternSql = $this->patternMs = $this->stages = $this->activeStages = [];
+        $this->queries = $this->patterns = $this->patternSql = $this->patternMs = $this->sourceCount = $this->sourceMs = $this->sourceSql = $this->stages = $this->activeStages = [];
         $this->collectionMilliseconds = 0;
     }
 
     public function record(QueryExecuted $event): void
     {
         if (! $this->recording) {
+            return;
+        }
+        if (config('pl.debug.ignore_impossible_queries', false) && preg_match('/where\s+0\s*=\s*1/i', $event->sql) === 1) {
             return;
         }
         $startedAt = hrtime(true);
@@ -104,10 +113,16 @@ final class SqlQueryProfiler
                     break;
                 }
             }
+            $offset = (hrtime(true) - $this->startedAt) / 1e6;
+            $sourceKey = $source ?? '(unknown)';
+            $this->sourceCount[$sourceKey] = ($this->sourceCount[$sourceKey] ?? 0) + 1;
+            $this->sourceMs[$sourceKey] = ($this->sourceMs[$sourceKey] ?? 0) + (float) $event->time;
+            $this->sourceSql[$sourceKey] ??= $event->sql;
             $this->queries[] = [
                 'number' => $this->count, 'sql' => Str::limit($event->sql, config('pl.debug.max_sql_length'), ' …'),
                 'ms' => round((float) $event->time, 3), 'connection' => $event->connectionName,
                 'parameter_count' => count($event->bindings), 'fingerprint' => $fingerprint, 'source' => $source,
+                'start_ms' => round($offset, 3),
             ];
         } finally {
             $this->collectionMilliseconds += (hrtime(true) - $startedAt) / 1e6;
@@ -173,6 +188,26 @@ final class SqlQueryProfiler
         return array_slice($groups, 0, (int) config('pl.debug.duplicate_groups', 5));
     }
 
+    /** @return list<array{source: string, count: int, ms: float, sql: string}> */
+    private function hotspots(): array
+    {
+        $groups = [];
+        foreach ($this->sourceCount as $source => $count) {
+            if ($count < 2) {
+                continue;
+            }
+            $groups[] = [
+                'source' => (string) $source,
+                'count' => $count,
+                'ms' => round((float) ($this->sourceMs[$source] ?? 0), 2),
+                'sql' => Str::limit((string) ($this->sourceSql[$source] ?? ''), 240, ' …'),
+            ];
+        }
+        usort($groups, fn (array $first, array $second): int => $second['ms'] <=> $first['ms']);
+
+        return array_slice($groups, 0, (int) config('pl.debug.hotspots', 5));
+    }
+
     private function isExcludedSource(string $file): bool
     {
         foreach ((array) config('pl.debug.exclude_paths', []) as $path) {
@@ -215,7 +250,7 @@ final class SqlQueryProfiler
             'stages' => $stages,
             'sql_ms' => round($this->milliseconds, 2), 'slow_count' => $this->slowCount,
             'repeated_count' => array_sum(array_map(fn (int $count): int => max(0, $count - 1), $this->patterns)),
-            'queries' => $queries, 'duplicates' => $this->duplicateGroups(),
+            'queries' => $queries, 'duplicates' => $this->duplicateGroups(), 'hotspots' => $this->hotspots(),
         ];
         $this->persist($profile, $queries);
 
@@ -250,6 +285,15 @@ final class SqlQueryProfiler
         } catch (\Throwable $exception) {
             report($exception);
         }
+    }
+
+    public function clear(): void
+    {
+        $cache = Cache::store(config('pl.debug.cache_store'));
+        foreach ((array) $cache->get('sql-debug:history', []) as $id) {
+            $cache->forget('sql-debug:'.$id);
+        }
+        $cache->forget('sql-debug:history');
     }
 
     /** @return list<array<string, mixed>> */

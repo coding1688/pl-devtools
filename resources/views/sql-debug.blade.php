@@ -1,6 +1,7 @@
 @if($standalone)
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>本地 SQL 调试</title>
+@if(($refresh ?? 0) > 0 && request()->query('request') === null)<meta http-equiv="refresh" content="{{ $refresh }}">@endif
 @endif
 <style>{!! is_string(config('pl.debug.css')) && is_file(config('pl.debug.css')) ? file_get_contents(config('pl.debug.css')) : '' !!}</style>
 @if($standalone)
@@ -12,6 +13,13 @@
         <a href="?type=ajax">AJAX {{ $counts['ajax'] ?? 0 }}</a>
     </p>
     <p>绑定参数不展开。慢查询阈值 {{ config('pl.debug.slow_ms') }} ms。<a href="{{ route((string) config('pl.debug.route_name', 'debug.sql')) }}">刷新全部请求</a></p>
+    <p class="sql-debug-controls">自动刷新：
+        @foreach([0 => '关闭', 2 => '2 秒', 5 => '5 秒'] as $seconds => $label)
+            <a href="{{ request()->fullUrlWithQuery(['refresh' => $seconds]) }}">{{ $label }}</a>@if(! $loop->last) · @endif
+        @endforeach
+        @if(($refresh ?? 0) > 0) · 每 {{ $refresh }} 秒自动刷新 @endif
+        <form method="POST" action="{{ route((string) config('pl.debug.route_name', 'debug.sql').'.clear') }}" class="sql-debug-inline-form">@csrf<button type="submit" class="sql-debug-link-button">清空历史</button></form>
+    </p>
 @else
 <details class="sql-debug-widget" data-sql-debug>
     <summary>SQL {{ $profiles[0]['query_count'] }} 条 · {{ $profiles[0]['sql_ms'] }} ms <span>请求 {{ $profiles[0]['duration_ms'] }} ms</span>
@@ -40,6 +48,29 @@
             <p>阶段耗时包含阶段内 SQL；父子阶段不能相加。Blade 嵌套模板仅累计最外层引擎耗时，不含进入引擎前的视图数据准备。未接入的阶段不显示；“—”表示未采集。</p>
         @else
             <p>此请求未采集业务 / Blade 阶段计时。</p>
+        @endif
+        @if(!empty($profile['hotspots']))
+            <h3 class="sql-debug-subtitle">N+1 热点（按调用位置）</h3>
+            <div class="sql-debug-table-wrap"><table class="sql-debug-table"><thead><tr><th>次数</th><th>总耗时</th><th>调用位置 / SQL</th></tr></thead><tbody>
+                @foreach($profile['hotspots'] as $hotspot)
+                    <tr><td>{{ $hotspot['count'] }}</td><td @class(['sql-debug-slow' => $hotspot['ms'] >= config('pl.debug.slow_ms')])>{{ $hotspot['ms'] }} ms</td><td><small>{{ $hotspot['source'] }}</small><pre>{{ $hotspot['sql'] }}</pre></td></tr>
+                @endforeach
+            </tbody></table></div>
+        @endif
+        @if(!empty($profile['queries']))
+            <h3 class="sql-debug-subtitle">时间线</h3>
+            <div class="sql-debug-timeline">
+                @foreach(collect($profile['queries'])->sortBy('start_ms') as $query)
+                    @php($left = min(100, ($query['start_ms'] ?? 0) / max(1, $profile['duration_ms']) * 100))
+                    @php($width = max(0.4, min(100, $query['ms'] / max(1, $profile['duration_ms']) * 100)))
+                    <div class="sql-debug-timeline-row">
+                        <span class="sql-debug-timeline-label">#{{ $query['number'] }}</span>
+                        <span class="sql-debug-timeline-track"><span class="sql-debug-timeline-bar" style="left: {{ $left }}%; width: {{ $width }}%"></span></span>
+                        <span class="sql-debug-timeline-ms">{{ $query['ms'] }} ms</span>
+                    </div>
+                @endforeach
+            </div>
+            <p class="sql-debug-hint">按执行顺序排列；左侧偏移为该查询开始时间占请求总耗时的比例。</p>
         @endif
         @if(!empty($profile['duplicates']))
             <h3 class="sql-debug-subtitle">重复查询（按语句结构，共 {{ count($profile['duplicates']) }} 组）</h3>

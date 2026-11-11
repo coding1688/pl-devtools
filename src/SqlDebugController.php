@@ -20,13 +20,23 @@ class SqlDebugController extends \Illuminate\Routing\Controller
             $type = (string) ($profile['type'] ?? 'html');
             $counts[$type] = ($counts[$type] ?? 0) + 1;
         }
+        $refresh = (int) $request->query('refresh', config('pl.debug.refresh_seconds', 0));
+        $refresh = max(0, min(60, $refresh));
         $type = $request->query('type');
         if (in_array($type, ['html', 'ajax'], true)) {
             $profiles = array_values(array_filter($profiles, fn (array $profile): bool => ($profile['type'] ?? 'html') === $type));
         }
         $response = $request->expectsJson() ? response()->json(['profiles' => $profiles, 'counts' => $counts])
-            : response()->view('pl-debug::sql-debug', ['profiles' => $profiles, 'counts' => $counts, 'standalone' => true]);
+            : response()->view('pl-debug::sql-debug', ['profiles' => $profiles, 'counts' => $counts, 'standalone' => true, 'refresh' => $refresh]);
 
         return $response->header('Cache-Control', 'private, no-store')->header('X-Robots-Tag', 'noindex, nofollow');
+    }
+
+    public function clear(Request $request): \Illuminate\Http\RedirectResponse
+    {
+        abort_unless($this->profiler->enabledFor($request), 404);
+        $this->profiler->clear();
+
+        return redirect()->to(url((string) config('pl.debug.path', '__debug/sql')));
     }
 }

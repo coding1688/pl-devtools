@@ -46,6 +46,10 @@ class DebugServiceProvider extends ServiceProvider
         Route::middleware(array_merge(['web'], (array) config('pl.debug.middleware', [])))
             ->get((string) config('pl.debug.path', '__debug/sql'), [SqlDebugController::class, 'index'])
             ->name((string) config('pl.debug.route_name', 'debug.sql'));
+
+        Route::middleware(array_merge(['web'], (array) config('pl.debug.middleware', [])))
+            ->post((string) config('pl.debug.path', '__debug/sql').'/clear', [SqlDebugController::class, 'clear'])
+            ->name((string) config('pl.debug.route_name', 'debug.sql').'.clear');
     }
 
     private function cssPath(): string

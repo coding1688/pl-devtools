@@ -30,6 +30,15 @@ return [
     /* How many duplicate-query groups to surface per request. */
     'duplicate_groups' => 5,
 
+    /* How many call-site hotspots (same file:line repeating) to surface. */
+    'hotspots' => 5,
+
+    /* Drop queries whose WHERE is always false, e.g. scope short-circuits. */
+    'ignore_impossible_queries' => false,
+
+    /* Auto refresh interval for the history page; 0 keeps it manual. */
+    'refresh_seconds' => 0,
+
     /* Optional labels for custom measure() stages. */
     'stage_labels' => [],
 

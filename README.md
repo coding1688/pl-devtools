@@ -48,6 +48,9 @@ APP_DEBUG=true
 
 - **HTML 与 AJAX 请求都会记录**：AJAX 响应没有工具栏，但会出现在历史页，并带上 `X-Debug-SQL-Url` 响应头指向该次画像；
 - 历史页支持 `?type=all|html|ajax` 过滤，并显示三类计数；
+- **时间线**：按执行顺序展示每条 SQL 的开始偏移与持续时间（占请求总耗时比例）；
+- **N+1 热点**：按调用位置（`file:line`）聚合重复查询；
+- **自动刷新**（`?refresh=2|5`）与**清空历史**按钮；
 - 每个画像显示 `controller@action`、登录用户（可配置关闭）、重复查询分组（按语句结构聚合次数与总耗时）；
 - 每个 HTML 响应底部会注入一个可折叠工具栏（SQL 条数、SQL 耗时、请求耗时、非 SQL 耗时、Blade 耗时、峰值内存、慢查询、重复查询）；
 - 响应头带上 `X-Debug-SQL-Request`、`X-Debug-SQL-Count`、`X-Debug-SQL-Time` 和 `Server-Timing`；
@@ -101,6 +104,9 @@ return [
 | `show_controller` | `true` | 是否显示控制器/方法 |
 | `track_user` / `user_guards` | `true` / `['backend','web','partner']` | 是否记录登录用户及检查的 guard |
 | `duplicate_groups` | `5` | 每个请求展示的重复查询分组数 |
+| `hotspots` | `5` | 按调用位置聚合的热点数量 |
+| `ignore_impossible_queries` | `false` | 忽略 `where 0 = 1` 这类恒假查询 |
+| `refresh_seconds` | `0` | 历史页自动刷新间隔（0 关闭） |
 | `stage_labels` | `[]` | `measure()` 阶段名的显示标签 |
 | `exclude_paths` | `[]` | 归因时忽略的应用文件 |
 

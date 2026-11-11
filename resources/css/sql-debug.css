@@ -25,3 +25,14 @@
 .sql-debug-kind { display: inline-block; padding: 0 6px; border-radius: 4px; font-size: 10px; font-weight: 700; letter-spacing: .04em; background: #e2e8f0; color: #152331; vertical-align: 1px; }
 .sql-debug-kind-ajax { background: #1d4ed8; color: #f8fafc; }
 .sql-debug-subtitle { margin: 14px 0 6px; font-size: 13px; font-weight: 700; }
+
+.sql-debug-controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.sql-debug-inline-form { display: inline; margin: 0; }
+.sql-debug-link-button { padding: 0; border: 0; background: none; color: #1d4ed8; font: inherit; cursor: pointer; text-decoration: underline; }
+.sql-debug-hint { margin: 4px 0 0; color: #5b6b7a; font-size: 12px; }
+.sql-debug-timeline { display: grid; gap: 3px; margin: 6px 0 14px; }
+.sql-debug-timeline-row { display: grid; grid-template-columns: 44px 1fr 70px; gap: 8px; align-items: center; }
+.sql-debug-timeline-label { color: #5b6b7a; font-size: 11px; text-align: right; }
+.sql-debug-timeline-track { position: relative; height: 12px; background: #e6ecf2; border-radius: 3px; overflow: hidden; }
+.sql-debug-timeline-bar { position: absolute; top: 0; bottom: 0; background: #2563eb; border-radius: 2px; }
+.sql-debug-timeline-ms { color: #334155; font-size: 11px; text-align: right; }
