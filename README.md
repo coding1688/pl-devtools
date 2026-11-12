@@ -99,6 +99,18 @@ php artisan vendor:publish --tag=pl-devtools-views
 php artisan vendor:publish --tag=pl-devtools-assets
 ```
 
+### 4. Publish the config stub (optional)
+
+```bash
+php artisan vendor:publish --tag=pl-devtools-config
+```
+
+This creates `config/devtools.php` (top-level `devtools` key), which is merged into `pl.devtools` at boot. Precedence:
+
+```
+package defaults < config/devtools.php < config/pl.php (host overrides)
+```
+
 ## Quick start
 
 1. Open any page; the bottom toolbar shows SQL count, duration and peak memory for the request.

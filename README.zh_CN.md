@@ -112,6 +112,18 @@ php artisan vendor:publish --tag=pl-devtools-views
 php artisan vendor:publish --tag=pl-devtools-assets
 ```
 
+### 4. 发布配置模板（可选）
+
+```bash
+php artisan vendor:publish --tag=pl-devtools-config
+```
+
+会生成 `config/devtools.php`（顶层 `devtools` 键），启动时合并进 `pl.devtools`。优先级：
+
+```
+包默认值 < config/devtools.php < config/pl.php（宿主覆盖）
+```
+
 ## 快速开始
 
 1. 打开任意页面，底部工具栏显示本次请求的 SQL 条数、耗时、峰值内存；

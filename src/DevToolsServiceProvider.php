@@ -55,8 +55,12 @@ class DevToolsServiceProvider extends ServiceProvider
     private function mergeDevToolsConfig(): void
     {
         $defaults = require __DIR__.'/../config/devtools.php';
+        // A published config/devtools.php sits between the package defaults and
+        // the host-owned config/pl.php overrides.
+        $published = (array) config('devtools', []);
         $override = (array) config('pl.devtools', []);
-        config(['pl.devtools' => $this->mergeConfigMap($defaults, $override)]);
+        $merged = $this->mergeConfigMap($defaults, $published);
+        config(['pl.devtools' => $this->mergeConfigMap($merged, $override)]);
     }
 
     /**
@@ -87,6 +91,10 @@ class DevToolsServiceProvider extends ServiceProvider
 
         if ($this->app->runningInConsole()) {
             $this->commands([\Coding1688\DevTools\Console\AuditCommand::class]);
+
+            $this->publishes([
+                __DIR__.'/../config/devtools.php' => config_path('devtools.php'),
+            ], 'pl-devtools-config');
 
             $this->publishes([
                 __DIR__.'/../resources/views' => resource_path('views/vendor/pl-devtools'),
