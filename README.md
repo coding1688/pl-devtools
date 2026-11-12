@@ -70,8 +70,6 @@ APP_DEBUG=true
 PL_DEVTOOLS_ENABLED=true
 ```
 
-The legacy variable `PL_DEBUG_ENABLED` is still accepted.
-
 ### 3. Open
 
 - The toolbar appears at the bottom of any HTML page.
@@ -229,7 +227,7 @@ All keys live under `pl.devtools`.
 
 | Key | Default | Description |
 | --- | --- | --- |
-| `enabled` | `env('PL_DEVTOOLS_ENABLED', env('PL_DEBUG_ENABLED', false))` | Master switch |
+| `enabled` | `env('PL_DEVTOOLS_ENABLED', false)` | Master switch |
 | `environments` | `['local','testing']` | Allowed environments |
 | `hosts` | `[]` | Allowed hosts, empty = any |
 | `path` | `__debug/sql` | Standalone page path |

@@ -55,7 +55,6 @@ APP_DEBUG=true
 PL_DEVTOOLS_ENABLED=true
 ```
 
-旧変数 `PL_DEBUG_ENABLED` も使用できます。
 
 ### 3. アクセス
 
@@ -132,7 +131,7 @@ php artisan devtools:audit --json --fresh
 
 | キー | 既定値 | 説明 |
 | --- | --- | --- |
-| `enabled` | `env('PL_DEVTOOLS_ENABLED', env('PL_DEBUG_ENABLED', false))` | マスタースイッチ |
+| `enabled` | `env('PL_DEVTOOLS_ENABLED', false)` | マスタースイッチ |
 | `environments` / `hosts` | `['local','testing']` / `[]` | 許可する環境とホスト |
 | `path` / `route_name` | `__debug/sql` / `debug.sql` | パスとルート名 |
 | `middleware` | `[]` | デバッグルートの追加ミドルウェア |

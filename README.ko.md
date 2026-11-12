@@ -55,7 +55,6 @@ APP_DEBUG=true
 PL_DEVTOOLS_ENABLED=true
 ```
 
-이전 변수 `PL_DEBUG_ENABLED`도 사용할 수 있습니다.
 
 ### 3. 접속
 
@@ -132,7 +131,7 @@ php artisan devtools:audit --json --fresh
 
 | 키 | 기본값 | 설명 |
 | --- | --- | --- |
-| `enabled` | `env('PL_DEVTOOLS_ENABLED', env('PL_DEBUG_ENABLED', false))` | 전체 스위치 |
+| `enabled` | `env('PL_DEVTOOLS_ENABLED', false)` | 전체 스위치 |
 | `environments` / `hosts` | `['local','testing']` / `[]` | 허용 환경·호스트 |
 | `path` / `route_name` | `__debug/sql` / `debug.sql` | 경로·라우트 이름 |
 | `middleware` | `[]` | 디버그 라우트 추가 미들웨어 |

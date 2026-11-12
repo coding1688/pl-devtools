@@ -82,7 +82,6 @@ APP_DEBUG=true
 PL_DEVTOOLS_ENABLED=true
 ```
 
-兼容旧变量名 `PL_DEBUG_ENABLED`，两者取其一即可。
 
 ### 3. 访问
 
@@ -241,7 +240,7 @@ jobs:
 
 | 键 | 默认值 | 说明 |
 | --- | --- | --- |
-| `enabled` | `env('PL_DEVTOOLS_ENABLED', env('PL_DEBUG_ENABLED', false))` | 总开关 |
+| `enabled` | `env('PL_DEVTOOLS_ENABLED', false)` | 总开关 |
 | `environments` | `['local','testing']` | 允许的环境 |
 | `hosts` | `[]` | 允许的 host，空表示任意 |
 | `path` | `__debug/sql` | 独立页路径 |

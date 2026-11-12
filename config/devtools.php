@@ -5,7 +5,7 @@ return [
     | The profiler is opt-in. Nothing is recorded, no middleware is prepended
     | and no route is registered unless this is explicitly true.
     */
-    'enabled' => env('PL_DEVTOOLS_ENABLED', env('PL_DEBUG_ENABLED', false)),
+    'enabled' => env('PL_DEVTOOLS_ENABLED', false),
 
     /* Environments allowed even when enabled. Empty means any environment. */
     'environments' => ['local', 'testing'],

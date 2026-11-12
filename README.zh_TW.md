@@ -55,7 +55,6 @@ APP_DEBUG=true
 PL_DEVTOOLS_ENABLED=true
 ```
 
-相容舊變數 `PL_DEBUG_ENABLED`。
 
 ### 3. 開啟頁面
 
@@ -132,7 +131,7 @@ php artisan devtools:audit --json --fresh
 
 | 鍵 | 預設 | 說明 |
 | --- | --- | --- |
-| `enabled` | `env('PL_DEVTOOLS_ENABLED', env('PL_DEBUG_ENABLED', false))` | 總開關 |
+| `enabled` | `env('PL_DEVTOOLS_ENABLED', false)` | 總開關 |
 | `environments` / `hosts` | `['local','testing']` / `[]` | 允許的環境與網域 |
 | `path` / `route_name` | `__debug/sql` / `debug.sql` | 路徑與路由名 |
 | `middleware` | `[]` | 偵錯路由的額外中介層 |
