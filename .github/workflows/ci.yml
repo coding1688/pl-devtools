@@ -27,6 +27,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         include:
           - php: '8.2'
@@ -41,5 +42,13 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           coverage: none
-      - run: composer require --dev "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --prefer-dist
+      # Laravel 11 is tested only for legacy compatibility in isolated CI.
+      - name: Install test dependencies
+        env:
+          COMPOSER_NO_SECURITY_BLOCKING: ${{ matrix.testbench == '^9.0' && '1' || '0' }}
+        run: composer require --dev "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --prefer-dist
+      - name: Report legacy dependency advisories
+        if: matrix.testbench == '^9.0'
+        continue-on-error: true
+        run: composer audit
       - run: composer test
