@@ -4,6 +4,10 @@
 
 [Moonsea](https://moonsea.dev) · [GitHub](https://github.com/coding1688/pl-devtools) · [Issues](https://github.com/coding1688/pl-devtools/issues)
 
+## Version 0.5.0 baseline
+
+The three Moonsea packages restart at `v0.5.0`. Earlier tags and GitHub Releases have been removed; commit history remains. Update Composer version constraints and lock files explicitly. This is a new version baseline, not an automatic upgrade from the removed releases.
+
 ## Laravel request profiling and diagnostics
 
 SQL timelines, request details, outgoing HTTP/cache telemetry, server information, performance summaries, log excerpts and configurable security checks in one package. No business models or migrations are required. Blade applications can use the injected toolbar; API applications can use response headers and the history endpoint.

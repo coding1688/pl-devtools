@@ -4,6 +4,10 @@
 
 [Moonsea](https://moonsea.dev) · [GitHub](https://github.com/coding1688/pl-devtools) · [Issues](https://github.com/coding1688/pl-devtools/issues)
 
+## バージョン 0.5.0 の基準
+
+3 つの Moonsea パッケージは `v0.5.0` から再開します。以前のタグと GitHub Releases は削除し、コミット履歴は保持しています。Composer のバージョン制約とロックファイルを明示的に更新してください。これは新しいバージョン基準であり、削除したリリースからの自動更新ではありません。
+
 ## Laravel のリクエスト分析・診断ツール
 
 SQL タイムライン、リクエスト情報、HTTP／キャッシュ計測、サーバー情報、性能集計、ログ要約、設定可能なセキュリティチェックを提供します。業務モデルやデータベースのマイグレーションは不要です。Blade ではツールバー、API ではレスポンスヘッダーと履歴画面を利用できます。

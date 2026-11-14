@@ -4,6 +4,10 @@
 
 [Moonsea](https://moonsea.dev) · [GitHub](https://github.com/coding1688/pl-devtools) · [Issues](https://github.com/coding1688/pl-devtools/issues)
 
+## 0.5.0 版本基线
+
+三个 Moonsea 包统一从 `v0.5.0` 重新开始。原标签和 GitHub Releases 已清理，提交历史保留。请显式更新 Composer 版本约束和锁文件。这是新的版本基线，不是从已移除版本自动升级。
+
 ## Laravel 请求分析与诊断工具
 
 集中查看 SQL 时间线、请求信息、HTTP／缓存遥测、服务器信息、性能汇总、日志摘要和可配置的安全检查。无需业务模型或数据库迁移。Blade 页面可使用注入工具栏，API 项目可使用响应头和历史记录页面。
