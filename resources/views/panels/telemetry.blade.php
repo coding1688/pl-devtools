@@ -14,7 +14,7 @@
     <div class="sql-debug-table-wrap"><table class="sql-debug-table"><thead><tr><th>{{ $t('sql.time') }}</th><th>{{ $t('telemetry.status') }}</th><th>{{ $t('telemetry.request') }}</th></tr></thead><tbody>
         @foreach($http as $call)
             <tr>
-                <td @class(['sql-debug-slow' => ($call['ms'] ?? 0) >= config('pl.devtools.slow_ms')])>{{ $call['ms'] ?? '—' }} ms</td>
+                <td @class(['sql-debug-slow' => ($call['ms'] ?? 0) >= config('devtools.slow_ms')])>{{ $call['ms'] ?? '—' }} ms</td>
                 <td>{{ $call['status'] ?? 'FAILED' }}</td>
                 <td><code>{{ $call['method'] }} {{ $call['url'] }}</code>@if(!empty($call['error']))<br><small class="sql-debug-slow">{{ $call['error'] }}</small>@endif</td>
             </tr>

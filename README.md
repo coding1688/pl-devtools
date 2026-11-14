@@ -2,370 +2,102 @@
 
 [English](README.md) | [简体中文](README.zh_CN.md) | [繁體中文](README.zh_TW.md) | [日本語](README.ja.md) | [한국어](README.ko.md)
 
-Laravel developer diagnostics: request profiler, SQL timeline, server information, security checks, HTTP/cache telemetry, performance rankings and log summary — all on one page.
+[Moonsea](https://moonsea.dev) · [GitHub](https://github.com/coding1688/pl-devtools) · [Issues](https://github.com/coding1688/pl-devtools/issues)
 
-- PHP 8.2+, Laravel 11 / 12 / 13
-- Disabled by default; requires `APP_DEBUG=true` and an explicit opt-in
-- Frontend-agnostic: Blade, Layui, Vue SPA
-- UI available in English, Simplified Chinese, Traditional Chinese, Japanese and Korean
-- The same security checks run in CI: `php artisan devtools:audit`
+## Laravel request profiling and diagnostics
 
-## Features
+SQL timelines, request details, outgoing HTTP/cache telemetry, server information, performance summaries, log excerpts and configurable security checks in one package. No business models or migrations are required. Blade applications can use the injected toolbar; API applications can use response headers and the history endpoint.
 
-| Panel | Content |
-| --- | --- |
-| Request | Method/path/status, route, `controller@action`, authenticated user, host/IP, whitelisted headers, middleware, query and input field names |
-| SQL | Count/time, slow queries, stage timings, N+1 call-site hotspots, timeline, duplicate groups, query details |
-| HTTP / Cache | Outgoing HTTP calls (method/URL/status/time/error) and cache hit/miss/write/forget counters |
-| Server | PHP/SAPI/OS/load, Laravel version and environment, DB connection/version, cache/queue/session/fs drivers, disks, extensions, OPcache |
-| Security | 12 read-only checks with severity and remediation hints |
-| Performance | Cross-request rankings: slowest requests, slowest queries, most repeated statements |
-| Logs | Log tail: counts by level and the latest entries (first line only, truncated) |
+## Requirements and installation
 
-Also included:
-
-- Inline bottom toolbar (switch panels, pin a historical request, follow SPA/Layui navigation)
-- Standalone history page (filter, auto refresh, clear, export JSON)
-- `devtools:audit` command (CI gate)
-
-The package has no dependency on the host application's models, tables, services or config files. It only uses its own `pl.devtools` defaults (merged at boot), the configured cache store, the log file and the database version query — so it can be dropped into any Laravel 11–13 app.
-
-## Requirements
-
-- PHP 8.2+
-- Laravel 11, 12 or 13
-
-## Installation
-
-### 1. Install via Composer
-
-The package is published on GitHub (VCS repository). Add it to the host `composer.json`:
-
-```json
-"repositories": [
-    { "type": "vcs", "url": "https://github.com/coding1688/pl-devtools.git" }
-]
-```
-
-Then install it as a dev dependency:
+Declared support: PHP `^8.2` and Laravel components `^11 | ^12 | ^13`. The chosen Laravel version may require newer PHP. This README describes current source; use a matching release. Laravel discovers the provider automatically. Install development dependencies in environments that need the tool.
 
 ```bash
 composer require --dev coding1688/pl-devtools
+php artisan vendor:publish --tag=devtools-config
 ```
 
-Laravel discovers `Coding1688\DevTools\DevToolsServiceProvider` automatically. If package discovery is disabled, add it to `bootstrap/providers.php`:
+If your Composer registry cannot resolve the package, add the source repository before installing:
 
-```php
-Coding1688\DevTools\DevToolsServiceProvider::class,
+```bash
+composer config repositories.pl-devtools vcs https://github.com/coding1688/pl-devtools.git
 ```
 
-> With `--dev`, `composer install --no-dev` in production does not ship it.
+## Enable locally
 
-### 2. Enable
-
-`.env`:
+The profiler is disabled by default. Enable both settings in a permitted development environment. The default history endpoint is `/__debug/sql`.
 
 ```dotenv
 APP_DEBUG=true
 PL_DEVTOOLS_ENABLED=true
 ```
 
-### 3. Open
-
-- The toolbar appears at the bottom of any HTML page.
-- Standalone page: `http://<your-host>/__debug/sql`.
-
-The first visit is empty by design: open a page or call an endpoint, then refresh.
-
-### 4. Configure (optional)
-
-Package defaults are merged into `pl.devtools`. Override them in the host `config/pl.php`:
-
-```php
-return [
-    'devtools' => [
-        'enabled' => env('PL_DEVTOOLS_ENABLED', false),
-        'hosts' => ['b.techpeek.local'],   // empty = any host
-        'middleware' => ['auth'],          // extra protection for the debug route
-        'slow_ms' => 100,
-    ],
-];
-```
-
-Publish views or assets if you need to customize the UI:
-
-```bash
-php artisan vendor:publish --tag=pl-devtools-views
-php artisan vendor:publish --tag=pl-devtools-assets
-```
-
-### 4. Publish the config stub (optional)
-
-```bash
-php artisan vendor:publish --tag=pl-devtools-config
-```
-
-This creates `config/devtools.php` (top-level `devtools` key), which is merged into `pl.devtools` at boot. Precedence:
-
-```
-package defaults < config/devtools.php < config/pl.php (host overrides)
-```
-
-## Quick start
-
-1. Open any page; the bottom toolbar shows SQL count, duration and peak memory for the request.
-2. Expand it and switch between `Request / SQL / HTTP / Cache`.
-3. Click "全部面板与历史请求" to open the standalone page with Server / Security / Performance / Logs and the last 50 requests.
-4. Run `php artisan devtools:audit` for a security check.
-
-## Toolbar
-
-Fixed at the bottom and showing a summary of the current request. When expanded:
-
-- **Panel switch**: `toolbar_collectors` controls which panels appear (Request / SQL / HTTP-Cache by default).
-- **View selector**:
-  - `自动（最新）` (auto/latest): refreshes to the newest request every `toolbar_refresh` seconds.
-  - Pick a historical request to pin it and stop following; switch back to auto at any time.
-- **State**: the expanded/collapsed state and the selected entry survive refreshes.
-- **Entry point**: "全部面板与历史请求" opens the standalone page.
-
-Compatibility:
-
-- Blade / Layui full-page rendering: the toolbar is re-rendered with each page.
-- Vue SPA and Layui iframe tabs: the toolbar polls `?toolbar=1`; polling only runs in the top-level window.
-- `toolbar_in_iframes = false` hides the toolbar inside iframes.
-- `toolbar_refresh = 0` disables polling entirely (useful for classic Blade sites).
-
-## Standalone page
-
-Default path `/__debug/sql`. Query parameters:
-
-| Parameter | Purpose |
-| --- | --- |
-| `?type=all\|html\|ajax` | Filter by request type |
-| `?request=<uuid>` | Show a single profile |
-| `?refresh=2\|5` | Auto-refresh interval in seconds |
-| `?fresh=1` | Clear the cached Server / Security / Performance / Logs snapshots |
-| `?export=json` | Download the current selection as JSON |
-| `?toolbar=1` | Fragment endpoint used by toolbar polling (rarely needed manually) |
-
-Page actions: clear history, export everything, export a single request.
-
-## Panels
-
-### Request
-
-Request line, status, route, controller, user, host/IP and duration; whitelisted headers (`accept`, `content-type`, `x-requested-with`, `referer`, `user-agent`); middleware chain; field names of query parameters and submitted input.
-
-Only field names and whitelisted headers are stored — never values, cookies or session content. Disable with `collect_request = false`.
-
-### SQL
-
-- `slow_ms` threshold, slow queries highlighted.
-- Stage timings: instrument with `$profiler->measure('name', fn () => ...)`; labels via `stage_labels`.
-- N+1 hotspots grouped by call site (`file:line`).
-- Timeline ordered by execution with start offset and duration.
-- Duplicate queries grouped by statement structure.
-- Query details sorted by duration with source, connection and binding count.
-
-### HTTP / Cache
-
-Laravel HTTP Client and Cache events:
-
-- Outgoing calls: method, URL (query string stripped), status, duration, failure reason.
-- Cache: hit / miss / write / forget counters.
-
-Only requests made through `Http::` are counted; raw `curl` / Guzzle calls are not. `telemetry` toggles HTTP and cache capture separately.
-
-### Server
-
-PHP version/SAPI/bits, OS/hostname/web server/load, INI values, Laravel version and environment, `APP_URL`, DB connection and version, cache/queue/session/filesystem/broadcast/mail drivers, disk usage and writability, 17 common extensions, OPcache hit rate and memory.
-
-Cached for `diagnostics_ttl`; not part of per-request profiles. `?fresh=1` forces a refresh.
-
-### Security
-
-12 read-only checks with severity and remediation:
-
-| Severity | Checks |
-| --- | --- |
-| high | `APP_DEBUG` outside local, missing/short `APP_KEY`, non-HTTPS `APP_URL`, devtools enabled outside local, non-writable `storage`/`bootstrap/cache`, `.env`/`.git` inside `public/`, executable extensions in the upload allow-list, vulnerable dependencies (optional) |
-| medium | Session cookie `secure`/`http_only`/`same_site`, DB user is root/postgres |
-| low | `QUEUE_CONNECTION=sync` / `CACHE_STORE=file` in production, `BCRYPT_ROUNDS<10` |
-
-### Performance
-
-Cross-request aggregation from cached profiles: slowest requests, slowest queries, most repeated statements. `performance.top` controls the number of rows.
-
-### Logs
-
-Reads only the tail of the log (`logs.max_bytes`), filters by `logs.levels`, keeps the first line only (max 300 characters) and never renders stack traces.
-
-## Security audit
-
-```bash
-php artisan devtools:audit                    # table output, non-zero on high findings
-php artisan devtools:audit --fail-on=medium  # non-zero on medium or higher
-php artisan devtools:audit --fail-on=none    # report only
-php artisan devtools:audit --json --fresh    # JSON output, ignore cache
-```
-
-Exit code: `1` when a finding reaches the threshold, otherwise `0`.
-
-CI example (GitHub Actions):
-
-```yaml
-name: security-audit
-on: [push, pull_request]
-jobs:
-  audit:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.4'
-      - run: composer install --no-interaction --prefer-dist
-      - run: php artisan devtools:audit --fail-on=high
-```
-
-Dependency auditing is disabled by default (it runs `composer audit`); enable it with `security.composer_audit = true`.
-
 ## Configuration
 
-All keys live under `pl.devtools`.
-
-### Basics
-
-| Key | Default | Description |
-| --- | --- | --- |
-| `enabled` | `env('PL_DEVTOOLS_ENABLED', false)` | Master switch |
-| `environments` | `['local','testing']` | Allowed environments |
-| `hosts` | `[]` | Allowed hosts, empty = any |
-| `path` | `__debug/sql` | Standalone page path |
-| `route_name` | `debug.sql` | Route name |
-| `middleware` | `[]` | Extra middleware for the debug route (e.g. `auth`) |
-| `cache_store` | `file` | Cache store used for profiles |
-| `ttl_seconds` | `1800` | Profile retention |
-| `history_limit` | `50` | History entries |
-| `store_cache` | `true` | Persist profiles |
-| `log` | `false` | Write the query log |
-| `log_channel` | `single` | Log channel |
-| `css` | `null` | Custom CSS path |
-| `locale` | `null` | UI locale: `en`, `zh_CN`, `zh_TW`, `ja`, `ko`; `null` uses the browser `Accept-Language`, then the app locale, then English |
-
-### Collection
-
-| Key | Default | Description |
-| --- | --- | --- |
-| `slow_ms` | `100` | Slow query threshold |
-| `max_queries` | `500` | Max queries per request |
-| `max_sql_length` | `16384` | SQL truncation length |
-| `exclude_paths` | `[]` | App paths ignored when attributing source |
-| `collect_request` | `true` | Capture Request panel data |
-| `show_controller` | `true` | Show controller/action |
-| `track_user` / `user_guards` | `true` / `['backend','web','partner']` | Record the authenticated user and which guards to check |
-| `duplicate_groups` | `5` | Duplicate groups per request |
-| `hotspots` | `5` | Call-site hotspots per request |
-| `ignore_impossible_queries` | `false` | Drop always-false queries such as `where 0 = 1` |
-| `stage_labels` | `[]` | Display labels for `measure()` stages |
-| `ignore_routes` | `[]` | Route names to skip, supports `admin.*` |
-| `ignore_paths` | `[]` | Path patterns to skip, supports `api/*` |
-
-### Toolbar
-
-| Key | Default | Description |
-| --- | --- | --- |
-| `toolbar_collectors` | `['request','sql','telemetry']` | Panels shown in the toolbar |
-| `toolbar_refresh` | `2` | Polling interval in seconds, 0 disables |
-| `toolbar_history` | `20` | Recent requests offered by the selector |
-| `toolbar_in_iframes` | `true` | Show the toolbar inside iframes |
-
-### Diagnostics
-
-| Key | Default | Description |
-| --- | --- | --- |
-| `diagnostics_ttl` | `300` | Cache TTL for Server / Performance / Logs |
-| `security_ttl` | `300` | Cache TTL for security results |
-| `telemetry.enabled` / `.http` / `.cache` / `.max_http` | `true` / `true` / `true` / `20` | HTTP and cache telemetry |
-| `performance.top` | `10` | Rows per ranking |
-| `logs.path` | `null` (`storage/logs/laravel.log`) | Log file |
-| `logs.levels` | `ERROR/CRITICAL/ALERT/EMERGENCY/WARNING` | Captured levels |
-| `logs.limit` | `50` | Displayed entries |
-| `logs.max_bytes` | `524288` | Tail bytes read |
-| `security.checks` | 12 check classes | Enabled checks |
-| `security.composer_audit` | `false` | Run `composer audit` |
-| `security.upload_extensions_config` | `files.uploads.allowed_extensions` | Config key inspected by the upload check; skipped when absent |
-| `locales` | `null` | Optional locale list shown on the Server panel |
-
-## Publishing and merging
-
-- No `pl-*` package publishes `config/pl.php`; that file is host-owned and is never overwritten by `vendor:publish`.
-- `pl.devtools` merges deeply: maps are merged, lists are replaced. A partial override such as `['security' => ['composer_audit' => true]]` keeps the built-in checks.
-- Package-specific publishes: `pl-files` → `config/files.php` (`files-config`), `pl-devtools` → views/assets. `pl-fields` publishes nothing.
-
-## Extending
-
-### Custom panel
-
-Implement `Coding1688\DevTools\Collectors\Collector`:
+Use `config/devtools.php` and `devtools.*`. Precedence: package defaults → legacy `pl.devtools` → `devtools`. Maps merge; lists replace, including empty lists. Legacy configuration is imported at provider registration. New runtime changes use canonical keys. The old `pl-devtools-config` publish tag remains an alias.
 
 ```php
-final class QueueCollector implements Collector
-{
-    public function key(): string { return 'queue'; }
-    public function label(): string { return 'Queue'; }
-    public function collect(array $profile): array { return [/* ... */]; }
-    public function view(): string { return 'pl-devtools::panels.queue'; }
-}
+// config/devtools.php
+'enabled' => env('PL_DEVTOOLS_ENABLED', false),
+'environments' => ['local', 'testing'],
+'hosts' => [],
+'collect' => true,
+'store_cache' => true,
+'log' => false,
+'toolbar' => true,
+'authorization_gate' => null,
+'locale' => null,
 ```
 
-Append it to `pl.devtools.collectors` and add a view under `resources/views/vendor/pl-devtools/panels/`.
+`collect` controls HTTP instrumentation. `store_cache` stores request history; `log` independently logs profile summaries. Disable both to avoid persistent profiles. `toolbar=false` disables HTML injection while retaining collection/headers. `enabled`, debug, environment, host and authorization checks still apply. Disabling collection also prevents access to the profiling history controller. Empty `hosts` allows any host within the allowed environment.
 
-### Custom security check
+## Shared environments and authorization
 
-Implement `Coding1688\DevTools\Diagnostics\Security\Check` and register it in `pl.devtools.security.checks`; it then appears both in the panel and in `devtools:audit`.
-
-### Stage timing
+Do not expose diagnostics as a public endpoint. Set allowed environments/hosts and configure a host-defined Gate. The example delegates to an application permission you must implement:
 
 ```php
-use Coding1688\DevTools\SqlQueryProfiler;
+use Illuminate\Support\Facades\Gate;
 
-$profiler = app(SqlQueryProfiler::class);
-$data = $profiler->measure('product_data', fn () => $service->prepare($id));
+Gate::define('view-devtools', fn ($user) => $user->can('inspect-diagnostics'));
+
+// config/devtools.php
+'authorization_gate' => 'view-devtools',
 ```
 
-## Commands
+The Gate applies to profiling, the injected toolbar and history access. Add your authentication middleware through `devtools.middleware` when needed. A Gate name alone does not establish a login session or validate a bearer token. The history routes use the `web` middleware group; the clear operation is POST. Rebuild route/config caches after changing deployment settings.
 
-| Command | Description |
-| --- | --- |
-| `php artisan devtools:audit` | Run security checks; `--json`, `--fresh`, `--fail-on=high\|medium\|low\|info\|none` |
+## Languages
 
-## Troubleshooting
+UI catalogs include `en`, `zh_CN`, `zh_TW`, `ja` and `ko`. An explicit `devtools.locale` wins; otherwise the resolver considers browser language, application locale and fallback locale. English console commands and technical identifiers are not all localized.
 
-| Symptom | What to check |
-| --- | --- |
-| Toolbar missing | `APP_DEBUG=true`, `PL_DEVTOOLS_ENABLED=true`, environment in `environments`, host in `hosts`; response must be HTML containing `</body>`; check `ignore_routes` / `ignore_paths` |
-| No toolbar on AJAX | By design (JSON cannot host HTML); use `?type=ajax` on the standalone page or the `X-Debug-SQL-Url` response header |
-| SPA / Layui iframe does not refresh | Polling is controlled by `toolbar_refresh` (2s default) and runs in the top window only; look for `__debug/sql?toolbar=1` in the network panel |
-| Empty data | Trigger a request first; check `cache_store` writability, `history_limit`, `store_cache` |
-| Page got slower | Increase `diagnostics_ttl`, disable `telemetry`, exclude busy routes with `ignore_*` |
-| Production | Do not enable; use `devtools:audit` instead |
+## Data handling and failure isolation
 
-## Compatibility
+Request input values and SQL bindings are not included in their respective detail records. Referer URLs, HTTP failure messages and log summaries use redaction: URL credentials/query strings/fragments and common secret assignments are removed. Extend sensitive key names with `devtools.redact_keys`. Secrets in URL paths, raw SQL literals or arbitrary business text cannot be reliably identified. Authorization is still required; redaction is not a confidentiality guarantee.
 
-- Laravel 11 / 12 / 13, PHP 8.2+
-- Semantic versioning: minor releases add features, patches fix bugs
-- Version history: see [Tags](https://github.com/coding1688/pl-devtools/tags)
+Collection and toolbar failures do not replace successful application responses or original business exceptions. Diagnostic failures are not recursively reported through the instrumented logger. Limit history/TTL and review cache/log access in shared environments.
 
-## Related packages
+## CLI diagnostics
 
-| Package | Description |
-| --- | --- |
-| `coding1688/pl-files` | Uploads, file references, multi-disk and multi-cloud replication |
-| `coding1688/pl-fields` | Field types, validation and option sources |
-| `coding1688/pl-devtools` | This package |
+The read-only audit command works without enabling HTTP profiling. `--fresh` bypasses its cached report; `--json` outputs JSON. `--fail-on` accepts `none`, `info`, `low`, `medium`, `high`; the default threshold is `high`. A configured failing finding can produce a nonzero exit code. These checks are configuration diagnostics, not a complete security assessment.
+
+```bash
+php artisan devtools:audit
+php artisan devtools:audit --json --fresh --fail-on=high
+```
+
+## Extending the package
+
+Implement `Collectors\Collector` and configure collector classes in `devtools.collectors`. Implement `Diagnostics\Security\Check` for host-specific checks and register them in `devtools.security.checks`. Follow the contracts in this version; there is no dependency on a particular admin framework. Published views can be customized with `pl-devtools-views`, and assets with `pl-devtools-assets`.
+
+## Development and upgrades
+
+Tests cover configuration compatibility, default registration, access controls, failure isolation, redaction and five-language key consistency. CI defines PHP/Laravel compatibility jobs; consult release results. When upgrading, migrate runtime `pl.devtools.*` writes to `devtools.*`, review access controls, and rebuild the host caches.
+
+```bash
+composer install
+composer test
+```
 
 ## License
 
-MIT
+[MIT License](LICENSE). Copyright © 2026 [coding1688 · Moonsea](https://moonsea.dev).

@@ -62,4 +62,4 @@
 @else
     <p class="sql-debug-hint">{{ $t('server.opcache_off') }}</p>
 @endif
-<p class="sql-debug-hint">{{ $t('server.note', ['ttl' => config('pl.devtools.diagnostics_ttl', 300)]) }}</p>
+<p class="sql-debug-hint">{{ $t('server.note', ['ttl' => config('devtools.diagnostics_ttl', 300)]) }}</p>

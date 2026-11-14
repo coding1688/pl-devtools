@@ -2,6 +2,7 @@
 
 namespace Coding1688\DevTools\Diagnostics;
 
+use Coding1688\DevTools\Redactor;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
@@ -14,16 +15,16 @@ final class LogSummary
     public function report(bool $fresh = false): array
     {
         if ($fresh) {
-            Cache::forget('pl-devtools:logs');
+            Cache::forget('pl-devtools:logs:v2');
         }
-        $ttl = max(10, (int) config('pl.devtools.diagnostics_ttl', 300));
+        $ttl = max(10, (int) config('devtools.diagnostics_ttl', 300));
 
-        return Cache::remember('pl-devtools:logs', $ttl, function (): array {
-            $path = (string) (config('pl.devtools.logs.path') ?: storage_path('logs/laravel.log'));
+        return Cache::remember('pl-devtools:logs:v2', $ttl, function (): array {
+            $path = (string) (config('devtools.logs.path') ?: storage_path('logs/laravel.log'));
             if (! is_file($path) || ! is_readable($path)) {
                 return ['path' => $path, 'exists' => false, 'size' => null, 'counts' => [], 'entries' => []];
             }
-            $maxBytes = max(65536, (int) config('pl.devtools.logs.max_bytes', 524288));
+            $maxBytes = max(65536, (int) config('devtools.logs.max_bytes', 524288));
             $size = (int) (filesize($path) ?: 0);
             $handle = fopen($path, 'rb');
             if ($handle === false) {
@@ -33,8 +34,8 @@ final class LogSummary
             $content = (string) stream_get_contents($handle);
             fclose($handle);
 
-            $levels = array_map('strtoupper', (array) config('pl.devtools.logs.levels', ['ERROR', 'CRITICAL', 'ALERT', 'EMERGENCY', 'WARNING']));
-            $limit = max(1, (int) config('pl.devtools.logs.limit', 50));
+            $levels = array_map('strtoupper', (array) config('devtools.logs.levels', ['ERROR', 'CRITICAL', 'ALERT', 'EMERGENCY', 'WARNING']));
+            $limit = max(1, (int) config('devtools.logs.limit', 50));
             $entries = [];
             $counts = [];
             foreach (preg_split('/\R/', $content) ?: [] as $line) {
@@ -46,7 +47,7 @@ final class LogSummary
                     continue;
                 }
                 $counts[$level] = ($counts[$level] ?? 0) + 1;
-                $entries[] = ['time' => $m['time'], 'level' => $level, 'message' => Str::limit(trim($m['message']), 300)];
+                $entries[] = ['time' => $m['time'], 'level' => $level, 'message' => Str::limit(Redactor::text(trim($m['message'])), 300)];
             }
 
             return [

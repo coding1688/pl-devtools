@@ -26,8 +26,8 @@ final class ComposerAuditCheck implements Check
 
     public function run(): array
     {
-        if (! config('pl.devtools.security.composer_audit', false)) {
-            return ['status' => 'skip', 'detail' => 'disabled; enable pl.devtools.security.composer_audit'];
+        if (! config('devtools.security.composer_audit', false)) {
+            return ['status' => 'skip', 'detail' => 'disabled; enable devtools.security.composer_audit'];
         }
         if (! class_exists(Process::class)) {
             return ['status' => 'skip', 'detail' => 'symfony/process is not available'];

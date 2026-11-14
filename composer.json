@@ -13,10 +13,11 @@
     ],
     "authors": [
         {
-            "name": "coding1688"
+            "name": "coding1688",
+            "homepage": "https://moonsea.dev"
         }
     ],
-    "homepage": "https://github.com/coding1688/pl-devtools",
+    "homepage": "https://moonsea.dev",
     "support": {
         "issues": "https://github.com/coding1688/pl-devtools/issues",
         "source": "https://github.com/coding1688/pl-devtools"
@@ -54,5 +55,8 @@
     },
     "config": {
         "sort-packages": true
+    },
+    "scripts": {
+        "test": "phpunit"
     }
 }

@@ -4,10 +4,12 @@ namespace Coding1688\DevTools;
 
 use Coding1688\DevTools\Collectors\CollectorRegistry;
 use Coding1688\DevTools\Diagnostics\ServerInfo;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
 use Symfony\Component\HttpFoundation\Response;
 
-class DevToolsController extends \Illuminate\Routing\Controller
+class DevToolsController extends Controller
 {
     public function __construct(
         private readonly SqlQueryProfiler $profiler,
@@ -26,7 +28,7 @@ class DevToolsController extends \Illuminate\Routing\Controller
             if ($recent === []) {
                 return response()->noContent();
             }
-            $options = array_slice($recent, 0, max(1, (int) config('pl.devtools.toolbar_history', 20)));
+            $options = array_slice($recent, 0, max(1, (int) config('devtools.toolbar_history', 20)));
             $requested = $request->query('request');
             $selected = null;
             if (is_string($requested) && preg_match('/^[a-f0-9-]{36}$/D', $requested) === 1) {
@@ -63,7 +65,7 @@ class DevToolsController extends \Illuminate\Routing\Controller
             $type = (string) ($profile['type'] ?? 'html');
             $counts[$type] = ($counts[$type] ?? 0) + 1;
         }
-        $refresh = (int) $request->query('refresh', config('pl.devtools.refresh_seconds', 0));
+        $refresh = (int) $request->query('refresh', config('devtools.refresh_seconds', 0));
         $refresh = max(0, min(60, $refresh));
         $type = $request->query('type');
         if (in_array($type, ['html', 'ajax'], true)) {
@@ -84,11 +86,11 @@ class DevToolsController extends \Illuminate\Routing\Controller
         return $response->header('Cache-Control', 'private, no-store')->header('X-Robots-Tag', 'noindex, nofollow');
     }
 
-    public function clear(Request $request): \Illuminate\Http\RedirectResponse
+    public function clear(Request $request): RedirectResponse
     {
         abort_unless($this->profiler->enabledFor($request), 404);
         $this->profiler->clear();
 
-        return redirect()->to(url((string) config('pl.devtools.path', '__debug/sql')));
+        return redirect()->to(url((string) config('devtools.path', '__debug/sql')));
     }
 }

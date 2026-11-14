@@ -1,11 +1,35 @@
 <?php
 
+use Coding1688\DevTools\Collectors\LogsCollector;
+use Coding1688\DevTools\Collectors\PerformanceCollector;
+use Coding1688\DevTools\Collectors\RequestCollector;
+use Coding1688\DevTools\Collectors\SecurityCollector;
+use Coding1688\DevTools\Collectors\ServerCollector;
+use Coding1688\DevTools\Collectors\SqlCollector;
+use Coding1688\DevTools\Collectors\TelemetryCollector;
+use Coding1688\DevTools\Diagnostics\Security\Checks\AppDebugCheck;
+use Coding1688\DevTools\Diagnostics\Security\Checks\AppKeyCheck;
+use Coding1688\DevTools\Diagnostics\Security\Checks\BcryptRoundsCheck;
+use Coding1688\DevTools\Diagnostics\Security\Checks\ComposerAuditCheck;
+use Coding1688\DevTools\Diagnostics\Security\Checks\DatabaseUserCheck;
+use Coding1688\DevTools\Diagnostics\Security\Checks\DebugToolsExposureCheck;
+use Coding1688\DevTools\Diagnostics\Security\Checks\HttpsUrlCheck;
+use Coding1688\DevTools\Diagnostics\Security\Checks\ProductionDriversCheck;
+use Coding1688\DevTools\Diagnostics\Security\Checks\PublicExposureCheck;
+use Coding1688\DevTools\Diagnostics\Security\Checks\SessionCookieCheck;
+use Coding1688\DevTools\Diagnostics\Security\Checks\StorageWritableCheck;
+use Coding1688\DevTools\Diagnostics\Security\Checks\UploadExtensionCheck;
+
 return [
     /*
     | The profiler is opt-in. Nothing is recorded, no middleware is prepended
     | and no route is registered unless this is explicitly true.
     */
     'enabled' => env('PL_DEVTOOLS_ENABLED', false),
+
+    // Independent collection, history persistence and HTML toolbar switches.
+    'collect' => true,
+    'toolbar' => true,
 
     /* Environments allowed even when enabled. Empty means any environment. */
     'environments' => ['local', 'testing'],
@@ -20,16 +44,19 @@ return [
     /* Extra middleware for the history route; add auth in shared environments. */
     'middleware' => [],
 
+    /* Optional Laravel gate required for profiling, toolbar and history access. */
+    'authorization_gate' => null,
+
     /* Show which controller handled the request. */
     /* Collectors rendered as tabs on the history page. */
     'collectors' => [
-        \Coding1688\DevTools\Collectors\RequestCollector::class,
-        \Coding1688\DevTools\Collectors\SqlCollector::class,
-        \Coding1688\DevTools\Collectors\ServerCollector::class,
-        \Coding1688\DevTools\Collectors\SecurityCollector::class,
-        \Coding1688\DevTools\Collectors\TelemetryCollector::class,
-        \Coding1688\DevTools\Collectors\PerformanceCollector::class,
-        \Coding1688\DevTools\Collectors\LogsCollector::class,
+        RequestCollector::class,
+        SqlCollector::class,
+        ServerCollector::class,
+        SecurityCollector::class,
+        TelemetryCollector::class,
+        PerformanceCollector::class,
+        LogsCollector::class,
     ],
 
     /* Per-request HTTP client and cache telemetry. */
@@ -54,18 +81,18 @@ return [
     /* Security diagnostics: read-only checks, reused by devtools:audit. */
     'security' => [
         'checks' => [
-            \Coding1688\DevTools\Diagnostics\Security\Checks\AppDebugCheck::class,
-            \Coding1688\DevTools\Diagnostics\Security\Checks\AppKeyCheck::class,
-            \Coding1688\DevTools\Diagnostics\Security\Checks\SessionCookieCheck::class,
-            \Coding1688\DevTools\Diagnostics\Security\Checks\HttpsUrlCheck::class,
-            \Coding1688\DevTools\Diagnostics\Security\Checks\DebugToolsExposureCheck::class,
-            \Coding1688\DevTools\Diagnostics\Security\Checks\StorageWritableCheck::class,
-            \Coding1688\DevTools\Diagnostics\Security\Checks\PublicExposureCheck::class,
-            \Coding1688\DevTools\Diagnostics\Security\Checks\DatabaseUserCheck::class,
-            \Coding1688\DevTools\Diagnostics\Security\Checks\UploadExtensionCheck::class,
-            \Coding1688\DevTools\Diagnostics\Security\Checks\ProductionDriversCheck::class,
-            \Coding1688\DevTools\Diagnostics\Security\Checks\BcryptRoundsCheck::class,
-            \Coding1688\DevTools\Diagnostics\Security\Checks\ComposerAuditCheck::class,
+            AppDebugCheck::class,
+            AppKeyCheck::class,
+            SessionCookieCheck::class,
+            HttpsUrlCheck::class,
+            DebugToolsExposureCheck::class,
+            StorageWritableCheck::class,
+            PublicExposureCheck::class,
+            DatabaseUserCheck::class,
+            UploadExtensionCheck::class,
+            ProductionDriversCheck::class,
+            BcryptRoundsCheck::class,
+            ComposerAuditCheck::class,
         ],
         'composer_audit' => false,
         'upload_extensions_config' => 'files.uploads.allowed_extensions',
@@ -98,7 +125,7 @@ return [
 
     /* Record the authenticated user; set user_guards to [] to disable. */
     'track_user' => true,
-    'user_guards' => ['backend', 'web', 'partner'],
+    'user_guards' => ['web'],
 
     /* How many duplicate-query groups to surface per request. */
     'duplicate_groups' => 5,

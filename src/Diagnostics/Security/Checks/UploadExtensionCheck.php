@@ -24,7 +24,7 @@ final class UploadExtensionCheck implements Check
 
     public function run(): array
     {
-        $key = (string) config('pl.devtools.security.upload_extensions_config', 'files.uploads.allowed_extensions');
+        $key = (string) config('devtools.security.upload_extensions_config', 'files.uploads.allowed_extensions');
         if (! config()->has($key)) {
             return ['status' => 'skip', 'detail' => 'not configured: '.$key];
         }

@@ -3,11 +3,11 @@
     var widget = document.querySelector('[data-sql-debug][data-refresh-url]');
     if (!widget || !window.fetch) { return; }
     var inIframe = window.top !== window.self;
-    @if(! config('pl.devtools.toolbar_in_iframes', true))
+    @if(! config('devtools.toolbar_in_iframes', true))
     if (inIframe) { widget.remove(); return; }
     @endif
     if (inIframe) { return; }
-    var interval = parseInt('{{ (int) config('pl.devtools.toolbar_refresh', 2) }}', 10);
+    var interval = parseInt('{{ (int) config('devtools.toolbar_refresh', 2) }}', 10);
     if (!interval || interval < 1) { return; }
     var pinned = null;
     var busy = false;

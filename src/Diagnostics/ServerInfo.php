@@ -21,7 +21,7 @@ final class ServerInfo
         if ($this->memo !== null) {
             return $this->memo;
         }
-        $ttl = max(10, (int) config('pl.devtools.diagnostics_ttl', 300));
+        $ttl = max(10, (int) config('devtools.diagnostics_ttl', 300));
 
         return $this->memo = Cache::remember('pl-devtools:server', $ttl, fn (): array => $this->collect());
     }
@@ -58,7 +58,7 @@ final class ServerInfo
                 'url' => (string) config('app.url'),
                 'locale' => app()->getLocale(),
                 'timezone' => (string) config('app.timezone'),
-                'locales' => count((array) (config('pl.devtools.locales') ?? config('platform.locales', []))),
+                'locales' => count((array) (config('devtools.locales') ?? [])),
                 'phpunit' => app()->runningUnitTests(),
             ],
             'database' => $this->database(),

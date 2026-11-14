@@ -17,7 +17,7 @@ final class SqlCollector implements Collector
     public function collect(array $profile): array
     {
         return [
-            'slow_ms' => (int) config('pl.devtools.slow_ms', 100),
+            'slow_ms' => (int) config('devtools.slow_ms', 100),
             'duration_ms' => (float) ($profile['duration_ms'] ?? 0),
             'query_count' => (int) ($profile['query_count'] ?? 0),
             'sql_ms' => (float) ($profile['sql_ms'] ?? 0),
@@ -26,7 +26,7 @@ final class SqlCollector implements Collector
             'queries' => (array) ($profile['queries'] ?? []),
             'duplicates' => (array) ($profile['duplicates'] ?? []),
             'hotspots' => (array) ($profile['hotspots'] ?? []),
-            'stage_labels' => (array) config('pl.devtools.stage_labels', []),
+            'stage_labels' => (array) config('devtools.stage_labels', []),
         ];
     }
 

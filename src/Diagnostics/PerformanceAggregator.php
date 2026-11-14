@@ -18,11 +18,11 @@ final class PerformanceAggregator
         if ($fresh) {
             Cache::forget('pl-devtools:performance');
         }
-        $ttl = max(10, (int) config('pl.devtools.diagnostics_ttl', 300));
+        $ttl = max(10, (int) config('devtools.diagnostics_ttl', 300));
 
         return Cache::remember('pl-devtools:performance', $ttl, function (): array {
-            $top = max(3, (int) config('pl.devtools.performance.top', 10));
-            $slowMs = (int) config('pl.devtools.slow_ms', 100);
+            $top = max(3, (int) config('devtools.performance.top', 10));
+            $slowMs = (int) config('devtools.slow_ms', 100);
             $profiles = $this->profiler->recent();
             $requests = [];
             $queries = [];

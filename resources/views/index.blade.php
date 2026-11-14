@@ -1,6 +1,6 @@
 @php
     $collectors = $collectors ?? [];
-    $visibleCollectors = $standalone ? $collectors : array_values(array_filter($collectors, fn ($item) => in_array($item->key(), (array) config('pl.devtools.toolbar_collectors', ['request', 'sql']), true)));
+    $visibleCollectors = $standalone ? $collectors : array_values(array_filter($collectors, fn ($item) => in_array($item->key(), (array) config('devtools.toolbar_collectors', ['request', 'sql']), true)));
     $locale = \Coding1688\DevTools\Locale::resolve(request());
     $t = function (string $key, array $replace = [], ?string $fallback = null) use ($locale): string {
         $full = 'devtools::ui.'.$key;
@@ -20,18 +20,18 @@
 @if(($refresh ?? 0) > 0 && request()->query('request') === null)<meta http-equiv="refresh" content="{{ $refresh }}">@endif
 @endif
 @if(! ($fragment ?? false))
-<style>{!! is_string(config('pl.devtools.css')) && is_file(config('pl.devtools.css')) ? file_get_contents(config('pl.devtools.css')) : '' !!}</style>
+<style>{!! is_string(config('devtools.css')) && is_file(config('devtools.css')) ? file_get_contents(config('devtools.css')) : '' !!}</style>
 @endif
 @if($standalone)
 </head><body class="sql-debug-body"><main class="sql-debug-page">
     <h1>{{ $t('title') }}</h1>
-    <p>{{ $t('history_intro', ['limit' => config('pl.devtools.history_limit')]) }}
+    <p>{{ $t('history_intro', ['limit' => config('devtools.history_limit')]) }}
         <a href="?type=all">{{ $t('all') }} {{ $counts['all'] ?? 0 }}</a> ·
         <a href="?type=html">{{ $t('html') }} {{ $counts['html'] ?? 0 }}</a> ·
         <a href="?type=ajax">{{ $t('ajax') }} {{ $counts['ajax'] ?? 0 }}</a>
     </p>
-    <p>{{ $t('binding_hint', ['ms' => config('pl.devtools.slow_ms')]) }}
-        <a href="{{ route((string) config('pl.devtools.route_name', 'devtools.index')) }}?fresh=1">{{ $t('refresh_all') }}</a> ·
+    <p>{{ $t('binding_hint', ['ms' => config('devtools.slow_ms')]) }}
+        <a href="{{ route((string) config('devtools.route_name', 'devtools.index')) }}?fresh=1">{{ $t('refresh_all') }}</a> ·
         <a href="{{ request()->fullUrlWithQuery(['export' => 'json']) }}">{{ $t('export_all') }}</a>
     </p>
     <p class="sql-debug-controls">{{ $t('auto_refresh') }}
@@ -39,15 +39,15 @@
             <a href="{{ request()->fullUrlWithQuery(['refresh' => $seconds]) }}">{{ $label }}</a>@if(! $loop->last) · @endif
         @endforeach
         @if(($refresh ?? 0) > 0) · {{ $t('seconds', ['n' => $refresh]) }} @endif
-        <form method="POST" action="{{ route((string) config('pl.devtools.route_name', 'devtools.index').'.clear') }}" class="sql-debug-inline-form">@csrf<button type="submit" class="sql-debug-link-button">{{ $t('clear') }}</button></form>
+        <form method="POST" action="{{ route((string) config('devtools.route_name', 'devtools.index').'.clear') }}" class="sql-debug-inline-form">@csrf<button type="submit" class="sql-debug-link-button">{{ $t('clear') }}</button></form>
     </p>
 @else
-<details class="sql-debug-widget" data-sql-debug data-signature="{{ $profiles[0]['id'] ?? '' }}" data-refresh-url="{{ route((string) config('pl.devtools.route_name', 'devtools.index')) }}?toolbar=1">
+<details class="sql-debug-widget" data-sql-debug data-signature="{{ $profiles[0]['id'] ?? '' }}" data-refresh-url="{{ route((string) config('devtools.route_name', 'devtools.index')) }}?toolbar=1">
     <summary>{{ $t('summary_sql', ['count' => $profiles[0]['query_count'], 'ms' => $profiles[0]['sql_ms']]) }} <span>{{ $t('summary_request', ['ms' => $profiles[0]['duration_ms']]) }}</span>
         <span>{{ $t('summary_non_sql', ['ms' => $profiles[0]['non_sql_ms'] ?? '—']) }}</span>
         <span>{{ $t('summary_peak', ['mb' => $profiles[0]['peak_memory_mb'] ?? '—']) }}</span> <span class="sql-debug-slow">{{ $t('summary_slow', ['n' => $profiles[0]['slow_count']]) }}</span> <span>{{ $t('summary_repeat', ['n' => $profiles[0]['repeated_count']]) }}</span></summary>
     <div class="sql-debug-panel"><p class="sql-debug-controls">
-        <span>{{ $t('local_only') }} · <a href="{{ route((string) config('pl.devtools.route_name', 'devtools.index')) }}" target="_blank" rel="noopener">{{ $t('all_panels') }}</a></span>
+        <span>{{ $t('local_only') }} · <a href="{{ route((string) config('devtools.route_name', 'devtools.index')) }}" target="_blank" rel="noopener">{{ $t('all_panels') }}</a></span>
         @if(!empty($recent))
             <label class="sql-debug-selector">{{ $t('view') }}
                 <select data-devtools-select>

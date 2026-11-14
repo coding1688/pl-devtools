@@ -23,7 +23,7 @@ final class SecurityAuditor
         if ($this->memo !== null) {
             return $this->memo;
         }
-        $ttl = max(10, (int) config('pl.devtools.security_ttl', (int) config('pl.devtools.diagnostics_ttl', 300)));
+        $ttl = max(10, (int) config('devtools.security_ttl', (int) config('devtools.diagnostics_ttl', 300)));
 
         return $this->memo = Cache::remember('pl-devtools:security', $ttl, function (): array {
             $rows = [];

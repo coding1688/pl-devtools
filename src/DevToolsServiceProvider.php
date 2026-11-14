@@ -2,25 +2,33 @@
 
 namespace Coding1688\DevTools;
 
-use Illuminate\Contracts\Http\Kernel;
-use Illuminate\Database\Events\QueryExecuted;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Route;
 use Coding1688\DevTools\Collectors\Collector;
 use Coding1688\DevTools\Collectors\CollectorRegistry;
-use Coding1688\DevTools\Collectors\RequestCollector;
 use Coding1688\DevTools\Collectors\LogsCollector;
 use Coding1688\DevTools\Collectors\PerformanceCollector;
-use Coding1688\DevTools\Collectors\TelemetryCollector;
+use Coding1688\DevTools\Collectors\RequestCollector;
 use Coding1688\DevTools\Collectors\SecurityCollector;
 use Coding1688\DevTools\Collectors\ServerCollector;
+use Coding1688\DevTools\Collectors\SqlCollector;
+use Coding1688\DevTools\Collectors\TelemetryCollector;
+use Coding1688\DevTools\Console\AuditCommand;
 use Coding1688\DevTools\Diagnostics\LogSummary;
-use Coding1688\DevTools\Telemetry\RequestTelemetry;
 use Coding1688\DevTools\Diagnostics\PerformanceAggregator;
 use Coding1688\DevTools\Diagnostics\Security\SecurityAuditor;
 use Coding1688\DevTools\Diagnostics\ServerInfo;
-use Coding1688\DevTools\Collectors\SqlCollector;
+use Coding1688\DevTools\Telemetry\RequestTelemetry;
+use Illuminate\Cache\Events\CacheHit;
+use Illuminate\Cache\Events\CacheMissed;
+use Illuminate\Cache\Events\KeyForgotten;
+use Illuminate\Cache\Events\KeyWritten;
+use Illuminate\Contracts\Http\Kernel;
+use Illuminate\Database\Events\QueryExecuted;
+use Illuminate\Http\Client\Events\ConnectionFailed;
+use Illuminate\Http\Client\Events\RequestSending;
+use Illuminate\Http\Client\Events\ResponseReceived;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
 class DevToolsServiceProvider extends ServiceProvider
@@ -34,11 +42,11 @@ class DevToolsServiceProvider extends ServiceProvider
         $this->app->singleton(PerformanceAggregator::class);
         $this->app->singleton(LogSummary::class);
         $this->app->scoped(RequestTelemetry::class);
-        $this->app->singleton(SecurityAuditor::class, fn (): SecurityAuditor => new SecurityAuditor((array) config('pl.devtools.security.checks', [])));
+        $this->app->singleton(SecurityAuditor::class, fn (): SecurityAuditor => new SecurityAuditor((array) config('devtools.security.checks', [])));
 
         $this->app->singleton(CollectorRegistry::class, fn (): CollectorRegistry => new CollectorRegistry(array_map(
             fn (string $class): Collector => $this->app->make($class),
-            (array) config('pl.devtools.collectors', [
+            (array) config('devtools.collectors', [
                 RequestCollector::class,
                 SqlCollector::class,
                 ServerCollector::class,
@@ -49,18 +57,16 @@ class DevToolsServiceProvider extends ServiceProvider
             ]),
         )));
 
-        config(['pl.devtools.css' => $this->cssPath()]);
+        config(['devtools.css' => $this->cssPath()]);
     }
 
     private function mergeDevToolsConfig(): void
     {
         $defaults = require __DIR__.'/../config/devtools.php';
-        // A published config/devtools.php sits between the package defaults and
-        // the host-owned config/pl.php overrides.
-        $published = (array) config('devtools', []);
-        $override = (array) config('pl.devtools', []);
-        $merged = $this->mergeConfigMap($defaults, $published);
-        config(['pl.devtools' => $this->mergeConfigMap($merged, $override)]);
+        $legacy = (array) config('pl.devtools', []);
+        $canonical = (array) config('devtools', []);
+        $merged = $this->mergeConfigMap($defaults, $legacy);
+        config(['devtools' => $this->mergeConfigMap($merged, $canonical)]);
     }
 
     /**
@@ -90,11 +96,11 @@ class DevToolsServiceProvider extends ServiceProvider
         $this->loadTranslationsFrom(__DIR__.'/../lang', 'devtools');
 
         if ($this->app->runningInConsole()) {
-            $this->commands([\Coding1688\DevTools\Console\AuditCommand::class]);
+            $this->commands([AuditCommand::class]);
 
             $this->publishes([
                 __DIR__.'/../config/devtools.php' => config_path('devtools.php'),
-            ], 'pl-devtools-config');
+            ], ['devtools-config', 'pl-devtools-config']);
 
             $this->publishes([
                 __DIR__.'/../resources/views' => resource_path('views/vendor/pl-devtools'),
@@ -105,7 +111,7 @@ class DevToolsServiceProvider extends ServiceProvider
             ], 'pl-devtools-assets');
         }
 
-        if (! config('pl.devtools.enabled') || ! config('app.debug')) {
+        if (! config('devtools.enabled') || ! config('devtools.collect', true) || ! config('app.debug')) {
             return;
         }
 
@@ -117,34 +123,34 @@ class DevToolsServiceProvider extends ServiceProvider
 
         $this->app->make(Kernel::class)->prependMiddleware(DevToolsMid::class);
 
-        Route::middleware(array_merge(['web'], (array) config('pl.devtools.middleware', [])))
-            ->get((string) config('pl.devtools.path', '__debug/sql'), [DevToolsController::class, 'index'])
-            ->name((string) config('pl.devtools.route_name', 'debug.sql'));
+        Route::middleware(array_merge(['web'], (array) config('devtools.middleware', [])))
+            ->get((string) config('devtools.path', '__debug/sql'), [DevToolsController::class, 'index'])
+            ->name((string) config('devtools.route_name', 'debug.sql'));
 
-        Route::middleware(array_merge(['web'], (array) config('pl.devtools.middleware', [])))
-            ->post((string) config('pl.devtools.path', '__debug/sql').'/clear', [DevToolsController::class, 'clear'])
-            ->name((string) config('pl.devtools.route_name', 'debug.sql').'.clear');
+        Route::middleware(array_merge(['web'], (array) config('devtools.middleware', [])))
+            ->post((string) config('devtools.path', '__debug/sql').'/clear', [DevToolsController::class, 'clear'])
+            ->name((string) config('devtools.route_name', 'debug.sql').'.clear');
     }
 
     private function listenTelemetry(): void
     {
-        if (! config('pl.devtools.telemetry.enabled', true)) {
+        if (! config('devtools.telemetry.enabled', true)) {
             return;
         }
         $events = [];
-        if (config('pl.devtools.telemetry.http', true)) {
+        if (config('devtools.telemetry.http', true)) {
             $events = [...$events,
-                \Illuminate\Http\Client\Events\RequestSending::class,
-                \Illuminate\Http\Client\Events\ResponseReceived::class,
-                \Illuminate\Http\Client\Events\ConnectionFailed::class,
+                RequestSending::class,
+                ResponseReceived::class,
+                ConnectionFailed::class,
             ];
         }
-        if (config('pl.devtools.telemetry.cache', true)) {
+        if (config('devtools.telemetry.cache', true)) {
             $events = [...$events,
-                \Illuminate\Cache\Events\CacheHit::class,
-                \Illuminate\Cache\Events\CacheMissed::class,
-                \Illuminate\Cache\Events\KeyWritten::class,
-                \Illuminate\Cache\Events\KeyForgotten::class,
+                CacheHit::class,
+                CacheMissed::class,
+                KeyWritten::class,
+                KeyForgotten::class,
             ];
         }
         foreach ($events as $event) {

@@ -15,7 +15,7 @@ final class Locale
 
     public static function resolve(?Request $request = null, ?string $configured = null): string
     {
-        $configured ??= config('pl.devtools.locale');
+        $configured ??= config('devtools.locale');
         if (is_string($configured) && in_array($configured, self::SUPPORTED, true)) {
             return $configured;
         }

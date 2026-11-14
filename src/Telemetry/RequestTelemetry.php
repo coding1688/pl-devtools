@@ -2,6 +2,7 @@
 
 namespace Coding1688\DevTools\Telemetry;
 
+use Coding1688\DevTools\Redactor;
 use Illuminate\Cache\Events\CacheHit;
 use Illuminate\Cache\Events\CacheMissed;
 use Illuminate\Cache\Events\KeyForgotten;
@@ -72,26 +73,20 @@ final class RequestTelemetry
             'url' => $this->maskUrl($event->request->url()),
             'status' => null,
             'ms' => $started === null ? null : round((hrtime(true) - $started) / 1e6, 2),
-            'error' => Str::limit((string) $event->exception->getMessage(), 160),
+            'error' => Str::limit(Redactor::text((string) $event->exception->getMessage()), 160),
         ];
     }
 
     private function maskUrl(string $url): string
     {
-        $parts = parse_url($url);
-        if (! is_array($parts)) {
-            return Str::limit($url, 160);
-        }
-        $base = ($parts['scheme'] ?? 'http').'://'.($parts['host'] ?? '?').(isset($parts['port']) ? ':'.$parts['port'] : '').($parts['path'] ?? '/');
-
-        return (isset($parts['query']) ? $base.'?…' : $base);
+        return Redactor::url($url);
     }
 
     /** @return array{http: list<array<string, mixed>>, cache: array<string, int>} */
     public function snapshot(): array
     {
         return [
-            'http' => array_slice($this->http, 0, max(1, (int) config('pl.devtools.telemetry.max_http', 20))),
+            'http' => array_slice($this->http, 0, max(1, (int) config('devtools.telemetry.max_http', 20))),
             'cache' => $this->cache,
         ];
     }

@@ -2,177 +2,102 @@
 
 [English](README.md) | [简体中文](README.zh_CN.md) | [繁體中文](README.zh_TW.md) | [日本語](README.ja.md) | [한국어](README.ko.md)
 
-Laravel 本機開發診斷工具：請求畫像、SQL 時間軸、伺服器資訊、安全性檢查、HTTP / 快取遙測、效能排行與日誌摘要，集中在同一頁面。
+[Moonsea](https://moonsea.dev) · [GitHub](https://github.com/coding1688/pl-devtools) · [Issues](https://github.com/coding1688/pl-devtools/issues)
 
-- PHP 8.2+，Laravel 11 / 12 / 13
-- 預設關閉，需 `APP_DEBUG=true` 且明確開啟
-- 與前端框架無關：Blade、Layui、Vue SPA
-- 介面支援英文、簡體中文、繁體中文、日文、韓文
-- 同一套安全檢查可跑 CI：`php artisan devtools:audit`
+## Laravel 請求分析與診斷工具
 
-## 功能
+集中檢視 SQL 時間線、請求資訊、HTTP／快取遙測、伺服器資訊、效能彙總、日誌摘要及可設定的安全檢查。無需業務模型或資料庫遷移。Blade 頁面可使用注入工具列，API 專案可使用回應標頭及歷史紀錄頁面。
 
-| 面板 | 內容 |
-| --- | --- |
-| Request | 方法/路徑/狀態、路由、`controller@action`、登入使用者、Host/IP、白名單請求標頭、中介層、查詢與提交欄位名稱 |
-| SQL | 數量/耗時、慢查詢、階段耗時、N+1 呼叫位置熱點、時間軸、重複查詢分組、查詢明細 |
-| HTTP / Cache | 外部 HTTP 呼叫（方法/網址/狀態/耗時/錯誤）與快取 hit/miss/write/forget 計數 |
-| Server | PHP/SAPI/OS/負載、Laravel 版本與環境、DB 連線與版本、cache/queue/session/fs 驅動、磁碟、擴充功能、OPcache |
-| Security | 12 項唯讀安全檢查，含等級與修復建議 |
-| Performance | 跨請求排行：最慢請求、最慢查詢、重複最多的語句 |
-| Logs | 日誌尾部：依等級計數與最近項目（僅保留首行並截斷） |
+## 環境需求與安裝
 
-另含：底部工具列、獨立歷史頁、`devtools:audit` 指令。
-
-本套件不依賴宿主應用的模型、資料表、Service 或設定檔；只使用自己的 `pl.devtools` 預設值（啟動時合併）、設定的 cache store、日誌檔與資料庫版本查詢，因此可放入任何 Laravel 11–13 專案。
-
-## 需求
-
-PHP 8.2+，Laravel 11 / 12 / 13。
-
-## 安裝
-
-### 1. 透過 Composer
-
-在宿主 `composer.json` 加入 VCS 倉庫：
-
-```json
-"repositories": [
-    { "type": "vcs", "url": "https://github.com/coding1688/pl-devtools.git" }
-]
-```
+宣告支援 PHP `^8.2`、Laravel 元件 `^11 | ^12 | ^13`；特定 Laravel 版本可能需要更新的 PHP。本文描述目前原始碼，請使用對應版本。Laravel 會自動探索服務提供者。需要工具的環境必須安裝開發依賴。
 
 ```bash
 composer require --dev coding1688/pl-devtools
+php artisan vendor:publish --tag=devtools-config
 ```
 
-Laravel 會自動發現 `Coding1688\DevTools\DevToolsServiceProvider`；若停用自動發現，請加入 `bootstrap/providers.php`。
+若 Composer 套件來源找不到套件，請先加入原始碼儲存庫，再安裝：
 
-### 2. 開啟
+```bash
+composer config repositories.pl-devtools vcs https://github.com/coding1688/pl-devtools.git
+```
+
+## 本機啟用
+
+預設關閉。請在允許的開發環境中同時啟用以下設定。預設歷史紀錄入口為 `/__debug/sql`。
 
 ```dotenv
 APP_DEBUG=true
 PL_DEVTOOLS_ENABLED=true
 ```
 
+## 設定慣例
 
-### 3. 開啟頁面
-
-- 任何 HTML 頁面底部會出現工具列；
-- 獨立頁面：`http://<你的網域>/__debug/sql`。
-
-第一次開啟沒有資料是正常的：先拜訪頁面或呼叫介面，再重新整理。
-
-### 4. 設定（可選）
-
-預設值合併到 `pl.devtools`，建議在 `config/pl.php` 覆寫：
+使用 `config/devtools.php` 與 `devtools.*`。優先順序：套件預設值 → 舊 `pl.devtools` → `devtools`。對應表遞迴合併，清單整體取代，包含空清單。舊設定僅在服務提供者註冊時匯入；執行期間修改應使用新路徑。舊發佈標籤 `pl-devtools-config` 保留為別名。
 
 ```php
-return [
-    'devtools' => [
-        'enabled' => env('PL_DEVTOOLS_ENABLED', false),
-        'hosts' => ['b.example.local'],
-        'middleware' => ['auth'],
-    ],
-];
+// config/devtools.php
+'enabled' => env('PL_DEVTOOLS_ENABLED', false),
+'environments' => ['local', 'testing'],
+'hosts' => [],
+'collect' => true,
+'store_cache' => true,
+'log' => false,
+'toolbar' => true,
+'authorization_gate' => null,
+'locale' => null,
 ```
 
-發佈視圖 / 資源：`php artisan vendor:publish --tag=pl-devtools-views`、`--tag=pl-devtools-assets`。
+`collect` 控制 HTTP 蒐集；`store_cache` 儲存請求歷史；`log` 獨立控制分析摘要日誌。若不需要持久保存分析資料，請同時關閉後兩項。`toolbar=false` 僅關閉 HTML 注入，保留蒐集及回應標頭。啟用、debug、環境、網域及授權檢查仍有效。關閉蒐集也會阻止存取分析歷史控制器。`hosts` 為空表示在允許的環境內不限制網域。
 
-## 快速開始
+## 共用環境與授權
 
-1. 開啟任一頁面，底部工具列顯示本次請求的 SQL 數量、耗時、峰值記憶體；
-2. 展開後切換 Request / SQL / HTTP-Cache 面板；
-3. 點「全部面板與歷史請求」進入獨立頁，查看 Server / Security / Performance / Logs 與最近 50 筆請求；
-4. 執行 `php artisan devtools:audit` 做安全檢查。
+請勿公開暴露診斷入口。設定允許的環境、網域，並定義宿主 Gate。以下範例依賴你在專案內實作的權限：
 
-## 工具列
+```php
+use Illuminate\Support\Facades\Gate;
 
-- 面板切換由 `toolbar_collectors` 控制（預設 Request / SQL / HTTP-Cache）；
-- 「查看」下拉選單：`自動（最新）` 每 `toolbar_refresh` 秒跟隨最新請求；選擇歷史請求即鎖定，可切回自動；
-- 重新整理或切換後保留展開狀態與選中項；
-- Blade / Layui 整頁渲染會隨頁面更新；Vue SPA 與 Layui iframe 透過 `?toolbar=1` 輪詢，僅在頂層視窗執行。
+Gate::define('view-devtools', fn ($user) => $user->can('inspect-diagnostics'));
 
-## 獨立頁面
+// config/devtools.php
+'authorization_gate' => 'view-devtools',
+```
 
-預設 `/__debug/sql`：
+Gate 同時保護蒐集、工具列與歷史存取。必要時透過 `devtools.middleware` 加入登入驗證中介層。設定 Gate 名稱本身不會建立登入狀態，也不會驗證 Bearer Token。歷史路由使用 `web` 中介層群組；清除操作為 POST。部署設定變更後，請重新產生路由與設定快取。
 
-| 參數 | 說明 |
-| --- | --- |
-| `?type=all\|html\|ajax` | 依請求類型過濾 |
-| `?request=<uuid>` | 只顯示單一畫像 |
-| `?refresh=2\|5` | 自動重新整理秒數 |
-| `?fresh=1` | 清除 Server / Security / Performance / Logs 快照 |
-| `?export=json` | 匯出目前篩選結果（附件下載） |
-| `?toolbar=1` | 工具列輪詢片段介面 |
+## 語言
 
-## 面板
+介面語言包含 `en`、`zh_CN`、`zh_TW`、`ja`、`ko`。明確設定的 `devtools.locale` 優先，否則依序參考瀏覽器語言、應用程式語言與備援語言。主控台英文提示及技術識別字尚未全部翻譯。
 
-- **Request**：請求、狀態、路由、控制器、使用者、Host/IP、白名單標頭、中介層、查詢與提交欄位名稱；不記錄參數值、Cookie 或 Session。
-- **SQL**：慢查詢、階段耗時（`measure()`）、N+1 呼叫位置熱點、時間軸、重複分組、查詢明細。
-- **HTTP / Cache**：僅統計 `Http::` 發出的請求；可分別關閉 HTTP 與快取擷取。
-- **Server**：環境、驅動、磁碟、擴充功能、OPcache；依 `diagnostics_ttl` 快取。
-- **Security**：高風險含 `APP_DEBUG`、`APP_KEY`、HTTPS、工具暴露、可寫入權限、`public/` 敏感檔、上傳副檔名、依賴漏洞（可選）。
-- **Performance**：最慢請求、最慢查詢、重複最多語句。
-- **Logs**：只讀尾部、只留首行、不顯示堆疊。
+## 資料處理與故障隔離
 
-## 安全稽核
+對應明細不儲存請求輸入值與 SQL 綁定值。Referer、HTTP 失敗訊息及日誌摘要會遮蔽 URL 憑證、查詢參數、片段與常見敏感鍵值。可透過 `devtools.redact_keys` 擴充敏感鍵名。URL 路徑、原始 SQL 字面值或任意業務文字中的機密無法可靠識別；遮蔽不能取代存取控制。
+
+蒐集與工具列失敗不會覆蓋正常業務回應或原始例外。診斷故障不會遞迴寫入受監測的日誌器。共用環境應限制歷史容量與 TTL，並管理快取、日誌存取。
+
+## 命令列診斷
+
+唯讀檢查命令無需啟用 HTTP 分析。`--fresh` 略過報告快取，`--json` 輸出 JSON。`--fail-on` 支援 `none`、`info`、`low`、`medium`、`high`，預設為 `high`；達到門檻的失敗項目可讓命令回傳非零狀態。此功能檢查設定風險，不取代完整安全評估。
 
 ```bash
 php artisan devtools:audit
-php artisan devtools:audit --fail-on=medium
-php artisan devtools:audit --fail-on=none
-php artisan devtools:audit --json --fresh
+php artisan devtools:audit --json --fresh --fail-on=high
 ```
 
-命中門檻回傳 `1`，否則 `0`。依賴漏洞檢查預設關閉，可用 `security.composer_audit = true` 開啟。
+## 擴充
 
-## 設定（常用）
+實作 `Collectors\Collector` 並在 `devtools.collectors` 註冊；實作 `Diagnostics\Security\Check` 並在 `devtools.security.checks` 註冊宿主檢查。請依循目前版本介面，不依賴特定後台框架。使用 `pl-devtools-views` 發佈檢視，使用 `pl-devtools-assets` 發佈樣式資源。
 
-| 鍵 | 預設 | 說明 |
-| --- | --- | --- |
-| `enabled` | `env('PL_DEVTOOLS_ENABLED', false)` | 總開關 |
-| `environments` / `hosts` | `['local','testing']` / `[]` | 允許的環境與網域 |
-| `path` / `route_name` | `__debug/sql` / `debug.sql` | 路徑與路由名 |
-| `middleware` | `[]` | 偵錯路由的額外中介層 |
-| `locales` | `null` | Server 面板顯示的語言清單（選填） |
-| `locale` | `null` | 介面語言：`en`、`zh_CN`、`zh_TW`、`ja`、`ko`；`null` 依序取瀏覽器 Accept-Language、應用 locale、英文 |
-| `slow_ms` / `max_queries` | `100` / `500` | 慢查詢門檻、單請求上限 |
-| `history_limit` / `ttl_seconds` | `50` / `1800` | 歷史筆數與保留時間 |
-| `toolbar_refresh` / `toolbar_history` | `2` / `20` | 輪詢秒數、下拉選單筆數 |
-| `toolbar_in_iframes` | `true` | iframe 內是否顯示 |
-| `ignore_routes` / `ignore_paths` | `[]` | 不採集的路由名 / 路徑 |
-| `diagnostics_ttl` / `security_ttl` | `300` / `300` | 快照快取秒數 |
-| `telemetry.*` | 開啟 | HTTP / 快取遙測 |
-| `performance.top` | `10` | 排行筆數 |
-| `logs.levels` / `logs.limit` | 錯誤級別 / `50` | 日誌擷取 |
-| `security.composer_audit` | `false` | 執行 `composer audit` |
+## 開發與升級
 
-## 指令
+測試涵蓋設定相容、預設註冊、存取控制、故障隔離、遮蔽與五語鍵一致性。CI 定義了 PHP／Laravel 相容工作，實際結果請查看對應版本。升級時將執行期間的 `pl.devtools.*` 寫入改為 `devtools.*`，檢查存取控制並重新產生宿主快取。
 
-| 指令 | 說明 |
-| --- | --- |
-| `php artisan devtools:audit` | 執行安全檢查；`--json`、`--fresh`、`--fail-on` |
+```bash
+composer install
+composer test
+```
 
-## 疑難排解
+## 授權條款
 
-| 現象 | 排查 |
-| --- | --- |
-| 工具列沒出現 | `APP_DEBUG`、`PL_DEVTOOLS_ENABLED`、`environments`、`hosts`；回應需為含 `</body>` 的 HTML；檢查 `ignore_*` |
-| AJAX 沒有工具列 | 設計如此；用獨立頁 `?type=ajax` 或回應標頭 `X-Debug-SQL-Url` |
-| SPA / iframe 不更新 | 確認 `toolbar_refresh`，Network 是否有 `?toolbar=1` |
-| 沒有資料 | 先產生請求；檢查 `cache_store` 寫入權限 |
-| 頁面變慢 | 調大 `diagnostics_ttl`、關閉 `telemetry`、用 `ignore_*` |
-| 生產環境 | 不要開啟，改用 `devtools:audit` |
-
-## 相容性
-
-Laravel 11 / 12 / 13，PHP 8.2+；版本記錄見 [Tags](https://github.com/coding1688/pl-devtools/tags)。
-
-## 相關套件
-
-`coding1688/pl-files`、`coding1688/pl-fields`、`coding1688/pl-devtools`。
-
-## 授權
-
-MIT
+[MIT License](LICENSE). Copyright © 2026 [coding1688 · Moonsea](https://moonsea.dev).
